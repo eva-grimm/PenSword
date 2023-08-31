@@ -1,0 +1,85 @@
+﻿@using PenSword.Services.Interfaces
+@model BlogPost
+@inject IImageService _ImageService;
+
+@{
+    ViewData["Title"] = "Edit Post";
+}
+
+<form asp-action="Edit" method="post" class="row" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="Created" />
+    <input type="hidden" asp-for="ImageData" />
+    <input type="hidden" asp-for="ImageType" />
+    <input type="hidden" asp-for="Slug" />
+    <div id="blogDiv" class="col-12 col-md-8">
+        <div class="form-group">
+            <label asp-for="Title" class="control-label"></label>
+            <input asp-for="Title" class="form-control" placeholder="Title" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+        <div class="form-group mt-3">
+            <label asp-for="Abstract" class="control-label"></label>
+            <textarea asp-for="Abstract" class="form-control" rows="5"
+                      placeholder="Say it in brief..."></textarea>
+            <span asp-validation-for="Abstract" class="text-danger"></span>
+        </div>
+        <div class="form-group mt-3">
+            <label asp-for="Content" class="control-label"></label>
+            <textarea asp-for="Content" class="form-control" rows="15"
+                      placeholder="What do you have to say...?"></textarea>
+            <span asp-validation-for="Content" class="text-danger"></span>
+        </div>
+    </div>
+    <div id="blogAttributesDiv" class="col-md-4">
+        <div class="form-group mt-3 mt-md-0">
+            <label asp-for="CategoryId" class="control-label"></label>
+            <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryList">
+                <option></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label asp-for="Tags" class="control-label"></label>
+            <select asp-for="Tags" class="form-control" asp-items="ViewBag.TagList">
+                <option></option>
+            </select>
+        </div>
+        <div class="form-group form-check">
+            <label class="form-check-label me-5">
+                <input class="form-check-input" asp-for="IsPublished" /> Publish?
+            </label>
+            <label class="form-check-label">
+                <input class="form-check-input" asp-for="IsDeleted" /> Delete?
+            </label>
+        </div>
+        <div id="blogImageDiv" class="square-img-container mt-3">
+            <img id="blogImage" class="square-img"
+                 src="@_ImageService.ConvertByteArrayToFile(Model.ImageData,Model.ImageType!,DefaultImage.BlogPostImage))" />
+        </div>
+        <div class="form-group mt-3">
+            <label asp-for="ImageFile" class="control-label">Cover Image?</label>
+            <input asp-for="ImageFile" id="userFile" class="form-control" accept=".png,.jpg,.jpeg,.gif"
+                   onchange="userFileInput()" />
+            <span asp-validation-for="ImageFile" class="text-danger"></span>
+        </div>
+        <div class="form-group mt-3">
+            <input type="submit" value="Edit" class="btn btn-primary" />
+        </div>
+        <div class=" mt-3">
+            <a asp-action="Index">Back to List</a>
+        </div>
+    </div>
+</form>
+
+
+@section Scripts {
+    <script>
+        function userFileInput() {
+            document.getElementById('blogImage').src = window.URL.createObjectURL(document.getElementById("userFile").files[0]);
+        }
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

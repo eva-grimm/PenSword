@@ -1,0 +1,105 @@
+﻿@using X.PagedList;
+@using X.PagedList.Mvc.Core;
+@using X.PagedList.Web.Common;
+@model IPagedList<BlogPost>;
+@inject IImageService _ImageService;
+
+@{
+    ViewData["Title"] = "Pen #> Sword";
+    string? actionName = ViewBag.ActionName;
+    string? searchString = ViewBag.SearchString;
+
+    string pageTitle = string.Empty;
+    switch (actionName)
+    {
+        case "Index":
+            pageTitle = "My Blogs";
+            break;
+        case "SearchIndex":
+            pageTitle = $"Search for '{searchString}'";
+            break;
+        case "Popular":
+            pageTitle = "Popular Posts";
+            break;
+        case "Favorites":
+            pageTitle = "Favorite Posts";
+            break;
+    }
+
+}
+
+<!-- Start Author Area  -->
+<partial name="_AuthorAreaPartial" />
+<!-- End Author Area  -->
+<!-- Start Post List Wrapper  -->
+<div class="axil-post-list-area axil-section-gap bg-color-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="page-title">
+                    <h2 class="title mb--40">@pageTitle</h2>
+                </div>
+            </div>
+            <div class="col-lg-8 col-xl-8">
+                <!-- Start Post List  -->
+                @if (Model.Count < 0 && ViewBag.ActionName == "Favorites")
+                {
+                    <p>
+                        You haven't favorited any blogs!
+                    </p>
+                }
+                else
+                {
+                    @foreach (BlogPost blogPost in Model)
+                    {
+                        <partial name="_BlogCardPartial" model="blogPost" />
+                    }
+                }
+                <!-- Start Paged List Pages -->
+                <div>
+                    <div>
+                        Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                    </div>
+                    @Html.PagedListPager(Model,pageNum => Url.Action(actionName, new { pageNum, searchString }),
+                    new PagedListRenderOptions
+                    {
+                    LiElementClasses = new string[] {"my-page-item"},
+                    PageClasses = new string[] {"my-page-link"}
+                    })
+                </div>
+                <!-- End Paged List Pages -->
+            </div>
+            <!-- End Post List  -->
+            <div class="col-lg-4 col-xl-4 mt_md--40 mt_sm--40">
+                <!-- Start Sidebar Area  -->
+                <partial name="_SidebarPartial" />
+                <!-- End Sidebar Area  -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Post List Wrapper  -->
+@section scripts {
+    <!--Sweet Alerts-->
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        let message = '@(ViewBag.SwalMessage)';
+        if (!message.includes("Error") && message != '') {
+            Swal.fire({
+                backdrop: false,
+                icon: 'success',
+                title: message,
+                showConfirmButton: true
+            });
+        } else if (message.includes("Error")) {
+            Swal.fire({
+                backdrop: false,
+                icon: 'error',
+                title: 'Oops...',
+                text: message
+            });
+        }
+    </script>
+    <!--End Sweet Alerts-->
+} 
