@@ -7,33 +7,35 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PenSword.Data;
 using PenSword.Models;
+using PenSword.Services.Interfaces;
 
 namespace PenSword.Controllers
 {
     public class CategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IBlogService _blogService;
+        private readonly IImageService _imageService;
 
-        public CategoriesController(ApplicationDbContext context)
+        public CategoriesController(ApplicationDbContext context,
+            IBlogService blogService,
+            IImageService imageService)
         {
             _context = context;
+            _blogService = blogService;
+            _imageService = imageService;
         }
 
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-              return _context.Categories != null ? 
-                          View(await _context.Categories.ToListAsync()) :
-                          Problem("Entity set 'ApplicationDbContext.Categories'  is null.");
+            return View(await _blogService.GetCategoriesAsync());
         }
 
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Categories == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var category = await _context.Categories
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -54,12 +56,19 @@ namespace PenSword.Controllers
         // POST: Categories/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,ImageData,ImageType")] Category category)
+        public async Task<IActionResult> Create([Bind("Name,Description,ImageFile")] Category category)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(category);
-                await _context.SaveChangesAsync();
+                if (category.ImageFile != null)
+                {
+                    // Convert file to byte array and assign it to image data
+                    category.ImageData = await _imageService.ConvertFileToByteArrayAsync(category.ImageFile);
+                    // Assign ImageType based on the chosen file
+                    category.ImageType = category.ImageFile.ContentType;
+                }
+
+                await _blogService.AddCategoryAsync(category);
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
@@ -68,28 +77,20 @@ namespace PenSword.Controllers
         // GET: Categories/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Categories == null)
-            {
-                return NotFound();
-            }
+            if (id == null)return NotFound();
 
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
+            Category? category = await _blogService.GetSingleCategoryAsync(id);
+            if (category == null) return NotFound();
+
             return View(category);
         }
 
         // POST: Categories/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,ImageData,ImageType")] Category category)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,ImageFile,ImageData,ImageType")] Category category)
         {
-            if (id != category.Id)
-            {
-                return NotFound();
-            }
+            if (id != category.Id) return NotFound();
 
             if (ModelState.IsValid)
             {

@@ -1,51 +1,26 @@
 ﻿@inject IImageService _ImageService;
+@inject IBlogService _BlogService;
 
 <div class="sidebar-inner">
 
     <!-- Start Category Widget  -->
     <div class="axil-single-widget widget widget_categories mb--30">
         <ul>
-            <!-- Do ForEach loop here-->
+            @foreach (Category category in await _BlogService.GetCategoriesAsync())
+            {
             <li class="cat-item">
                 <a href="#" class="inner">
                     <div class="thumbnail">
-                        <img src="assets/images/post-images/category-image-01.jpg" alt="">
+                        <img src="@_ImageService.ConvertByteArrayToFile(
+                            category.ImageData, category.ImageType, DefaultImage.CategoryImage)" 
+                            alt="@category.Name">
                     </div>
                     <div class="content">
-                        <h5 class="title">Tech</h5>
+                        <h5 class="title">@category.Name</h5>
                     </div>
                 </a>
             </li>
-            <li class="cat-item">
-                <a href="#" class="inner">
-                    <div class="thumbnail">
-                        <img src="assets/images/post-images/category-image-02.jpg" alt="">
-                    </div>
-                    <div class="content">
-                        <h5 class="title">Style</h5>
-                    </div>
-                </a>
-            </li>
-            <li class="cat-item">
-                <a href="#" class="inner">
-                    <div class="thumbnail">
-                        <img src="assets/images/post-images/category-image-03.jpg" alt="">
-                    </div>
-                    <div class="content">
-                        <h5 class="title">Travel</h5>
-                    </div>
-                </a>
-            </li>
-            <li class="cat-item">
-                <a href="#" class="inner">
-                    <div class="thumbnail">
-                        <img src="assets/images/post-images/category-image-04.jpg" alt="">
-                    </div>
-                    <div class="content">
-                        <h5 class="title">Food</h5>
-                    </div>
-                </a>
-            </li>
+            }
         </ul>
     </div>
     <!-- End Category Widget  -->
@@ -66,7 +41,7 @@
         <!-- Start Post List  -->
         <div class="post-medium-block">
             <!-- Do ForEach loop here-->
-            @foreach (BlogPost blogPost in ViewBag.PopularBlogs)
+            @foreach (BlogPost blogPost in await _BlogService.GetPopularBlogPostsAsync(3))
             {
             <!-- Start Single Post  -->
             <div class="content-block post-medium mb--20">
@@ -84,7 +59,7 @@
                     </h6>
                     <div class="post-meta">
                         <ul class="post-meta-list">
-                            <li>@blogPost.Created</li>
+                            <li>@blogPost.Created.ToString("MMM dd yyyy")</li>
                             <li>[*View Count*]</li>
                         </ul>
                     </div>

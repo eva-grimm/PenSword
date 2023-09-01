@@ -33,6 +33,31 @@ namespace PenSword.Services.Interfaces
             }
         }
 
+        public async Task UpdateBlogPostAsync(BlogPost? blogPost)
+        {
+            if (blogPost == null) return;
+
+            try
+            {
+                _context.Update(blogPost);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task DeleteBlogPostAsync(int? blogPostId)
+        {
+            BlogPost? blogPost = await _context.BlogPosts.FindAsync(blogPostId);
+            if (blogPost == null) return;
+
+            _context.BlogPosts.Remove(blogPost);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<BlogPost> GetSingleBlogPostAsync(int? blogPostId)
         {
             if (blogPostId == null) return new BlogPost();
@@ -63,6 +88,24 @@ namespace PenSword.Services.Interfaces
                 .Include(b => b.Tags)
                 .FirstOrDefaultAsync(b => b.Slug == slug);
                 return blogPost!;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<BlogPost>> GetAllBlogPostsAsync()
+        {
+            try
+            {
+                IEnumerable<BlogPost> blogPosts = await _context.BlogPosts
+                    .Include(b => b.Category)
+                    .Include(b => b.Comments)
+                        .ThenInclude(c => c.Author)
+                    .Include(b => b.Tags)
+                    .ToListAsync();
+                return blogPosts;
             }
             catch (Exception)
             {
@@ -123,13 +166,28 @@ namespace PenSword.Services.Interfaces
             }
         }
 
-        public async Task UpdateBlogPostAsync(BlogPost? blogPost)
+        public async Task AddCategoryAsync(Category? category)
         {
-            if (blogPost == null) return;
+            if (category == null) return;
 
             try
             {
-                _context.Update(blogPost);
+                _context.Add(category);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateCategoryAsync(Category? category)
+        {
+            if (category == null) return;
+
+            try
+            {
+                _context.Update(category);
                 await _context.SaveChangesAsync();
             }
             catch (Exception)
@@ -139,13 +197,28 @@ namespace PenSword.Services.Interfaces
             }
         }
 
-        public async Task DeleteBlogPostAsync(int? blogPostId)
+        public async Task DeleteCategoryAsync(int? categoryId)
         {
-            BlogPost? blogPost = await _context.BlogPosts.FindAsync(blogPostId);
-            if (blogPost == null) return;
+            Category? category = await _context.Categories.FindAsync(categoryId);
+            if (category == null) return;
 
-            _context.BlogPosts.Remove(blogPost);
+            _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<Category> GetSingleCategoryAsync(int? categoryId)
+        {
+            if (categoryId == null) return new Category();
+            try
+            {
+                Category? category = await _context.Categories
+                .FirstOrDefaultAsync(c => c.Id == categoryId);
+                return category!;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<IEnumerable<Category>> GetCategoriesAsync()

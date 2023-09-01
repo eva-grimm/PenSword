@@ -41,9 +41,17 @@ namespace PenSword.Controllers
                 .ToPagedListAsync(page, pageSize);
             ViewData["ActionName"] = nameof(Index);
 
-            // Popular Blog Posts for Sidebar widget
-            IEnumerable<BlogPost> popularBlogPosts = await _blogService.GetPopularBlogPostsAsync(pageSize);
-            ViewData["PopularBlogs"] = popularBlogPosts;
+            return View(blogPosts);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AuthorArea(int? pageNum)
+        {
+            int pageSize = 3;
+            int page = pageNum ?? 1;
+            IPagedList<BlogPost> blogPosts = await (await _blogService.GetAllBlogPostsAsync())
+                .ToPagedListAsync(page, pageSize);
+
             return View(blogPosts);
         }
 
@@ -70,10 +78,6 @@ namespace PenSword.Controllers
                 .ToPagedListAsync(page, pageSize);
             ViewData["ActionName"] = nameof(FavoriteBlogs);
 
-            // Popular Blog Posts for Sidebar widget
-            IEnumerable<BlogPost> popularBlogPosts = await _blogService.GetPopularBlogPostsAsync(pageSize);
-            ViewData["PopularBlogs"] = popularBlogPosts;
-
             return View(nameof(Index), blogPosts);
         }
 
@@ -99,10 +103,6 @@ namespace PenSword.Controllers
 
             ViewData["ActionName"] = nameof(SearchIndex);
             ViewData["SearchString"] = searchString;
-
-            // Popular Blog Posts for Sidebar widget
-            IEnumerable<BlogPost> popularBlogPosts = await _blogService.GetPopularBlogPostsAsync(pageSize);
-            ViewData["PopularBlogs"] = popularBlogPosts;
 
             return View(nameof(Index), blogPosts);
         }
@@ -258,31 +258,47 @@ namespace PenSword.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.BlogPosts == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var blogPost = await _context.BlogPosts
-                .Include(b => b.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (blogPost == null)
-            {
-                return NotFound();
-            }
+            BlogPost? blogPost = await _blogService.GetSingleBlogPostAsync(id);
+           
+            if (blogPost == null) return NotFound();
+
+            await _blogService.DeleteBlogPostAsync(blogPost.Id);
 
             return View(blogPost);
         }
 
-        // POST: BlogPosts/Delete/5
-        [HttpPost, ActionName("Delete"), ValidateAntiForgeryToken, Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> TogglePublish(int? id)
         {
-            if (_context.BlogPosts == null) return Problem("Entity set 'ApplicationDbContext.BlogPosts'  is null.");
+            if (id == null || id == 0) return NotFound();
 
-            await _blogService.DeleteBlogPostAsync(id);
+            BlogPost? blogPost = await _blogService.GetSingleBlogPostAsync(id);
 
-            return RedirectToAction(nameof(Index));
+            if (blogPost == null) return NotFound();
+
+            blogPost.IsPublished = !blogPost.IsPublished;
+
+            await _blogService.UpdateBlogPostAsync(blogPost);
+
+            return RedirectToAction(nameof(Details), new { slug = blogPost.Slug });
+        }
+        
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ToggleDelete(int? id)
+        {
+            if (id == null || id == 0) return NotFound();
+
+            BlogPost? blogPost = await _blogService.GetSingleBlogPostAsync(id);
+
+            if (blogPost == null) return NotFound();
+
+            blogPost.IsDeleted = !blogPost.IsDeleted;
+
+            await _blogService.UpdateBlogPostAsync(blogPost);
+
+            return RedirectToAction(nameof(Details), new { slug = blogPost.Slug });
         }
 
         private bool BlogPostExists(int id)

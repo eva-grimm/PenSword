@@ -8,11 +8,16 @@ namespace PenSword.Services.Interfaces
     public interface IBlogService
     {
         public Task AddBlogPostAsync(BlogPost? blogPost);
-        public Task<BlogPost> GetSingleBlogPostAsync(int? blogPostId);
-        public Task<BlogPost> GetSingleBlogPostAsync(string? slug);
-        public Task<IEnumerable<BlogPost>> GetBlogPostsAsync();
         public Task UpdateBlogPostAsync(BlogPost? blogPost);
         public Task DeleteBlogPostAsync(int? blogPostId);
+        public Task<BlogPost> GetSingleBlogPostAsync(int? blogPostId);
+        public Task<BlogPost> GetSingleBlogPostAsync(string? slug);
+        public Task<IEnumerable<BlogPost>> GetAllBlogPostsAsync();
+        public Task<IEnumerable<BlogPost>> GetBlogPostsAsync();
+        public Task AddCategoryAsync(Category? category);
+        public Task UpdateCategoryAsync(Category? category);
+        public Task DeleteCategoryAsync(int? categoryId);
+        public Task<Category> GetSingleCategoryAsync(int? categoryId);
         public Task<IEnumerable<Category>> GetCategoriesAsync();
         public Task<IEnumerable<BlogPost>> GetPopularBlogPostsAsync(int? count = null);
         public Task<IEnumerable<BlogPost>> GetFavoriteBlogPostsAsync(string? blogUserId);

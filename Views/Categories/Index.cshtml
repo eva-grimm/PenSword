@@ -1,53 +1,30 @@
-﻿@model IEnumerable<PenSword.Models.Category>
+﻿@model IEnumerable<Category>
+@inject IImageService _ImageService;
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ImageData)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ImageType)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ImageData)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ImageType)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="post-single-wrapper axil-section-gap bg-color-white">
+    <div class="container text-end mb-3">
+        <a class="btn btn-primary rounded-pill" asp-action="create" asp-controller="notes">Add<i class="bi bi-person-plus-fill ps-2"></i></a>
+    </div>
+    <div class="container mt-5">
+        <div id="notes-list" class="row row-cols-1 row-cols-md-2 g-3 mb-3">
+            @foreach (Category category in Model)
+            {
+                <div class="card" style="width: 18rem;">
+                    <img src="@_ImageService.ConvertByteArrayToFile(category.ImageData, category.ImageType, DefaultImage.CategoryImage)"
+                         class="card-img-top" alt="@category.Name">
+                    <div class="card-body">
+                        <h5 class="card-title">@category.Name</h5>
+                    </div>
+                    <div class="card-footer">
+                        <a class="me-3 editIcons" asp-controller="Categories" asp-action="Edit" asp-route-id="@category.Id"><i class="bi bi-pencil-square"></i></a>
+                        <a class="me-3 editIcons" asp-controller="Categories" asp-action="Delete" asp-route-id="@category.Id"><i class="bi bi-trash-fill"></i></a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
