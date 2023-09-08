@@ -26,6 +26,7 @@ namespace PenSword.Models
 
         //Navigation Properties
         public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
-        public virtual ICollection<BlogPost> LikedBlogPosts { get; set; } = new HashSet<BlogPost>();
+        public virtual ICollection<Like> Likes { get; set; } = new HashSet<Like>();
+        public virtual ICollection<BlogPost> PostsUserLikes { get; set; } = new HashSet<BlogPost>();
     }
 }

@@ -20,7 +20,7 @@
         </div>
         <h4 class="title">
             <a href="/Content/@Model?.Slug">
-                @Model?.Title;
+                @Model?.Title
             </a>
         </h4>
         <div class="post-meta-wrapper">
@@ -34,7 +34,9 @@
                         </a>
                     </h6>
                     <ul class="post-meta-list">
-                        <li>@Model?.Created.ToString("MMM dd, yyyy")</li>
+                        <li><span><i class="bi bi-calendar-event"></i> </span>@Model?.Created.ToString("MMM dd yyyy")</li>
+                        <li><span><i class="bi bi-card-text"></i> </span>@Model?.Comments.Count()</li>
+                        <li><span><i class="bi bi-hand-thumbs-up"></i> </span>@Model?.Likes.Count()</li>
                     </ul>
                 </div>
             </div>

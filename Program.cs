@@ -6,6 +6,7 @@ using PenSword.Data;
 using PenSword.Models;
 using PenSword.Services;
 using PenSword.Services.Interfaces;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +34,37 @@ builder.Services.AddMvc();
 // Bind the email settings to the EmailSettings object
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
+// settings and configuration for API
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Pen #> Sword",
+        Version = "v1",
+        Description = "A public facing API to fetch the specified number of the latest blog posts up to a maximum of 10",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "Cadence Eva Custin",
+            Email = "eva.custin@gmail.com",
+            Url = new Uri("https://cadence-eva.netlify.app/")
+        }
+    });
+
+    string xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFileName));
+});
+builder.Services.AddCors(cors =>
+{
+    cors.AddPolicy("DefaultPolicy", 
+        builder => builder.AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader());
+});
+
 var app = builder.Build();
+
+// put the Cors into effect, allowing outside app access
+app.UseCors("DefaultPolicy");
 
 // access DataUtility
 var scope = app.Services.CreateScope();
@@ -50,6 +81,16 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+// 
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "PublicAPI v1");
+    c.InjectStylesheet("/css/swagger.css");
+    c.InjectJavascript("/js/swagger.js");
+    c.DocumentTitle = "Pen #> Sword Documentation";
+});
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

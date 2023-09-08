@@ -21,5 +21,6 @@ namespace PenSword.Data
         public virtual DbSet<Category> Categories { get; set; } = default!;
         public virtual DbSet<Comment> Comments { get; set; } = default!;
         public virtual DbSet<Tag> Tags { get; set; } = default!;
+        public virtual DbSet<Like> Likes { get; set; } = default!;
     }
 }

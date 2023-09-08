@@ -1121,20 +1121,8 @@ font-family: 'Red Hat Display', sans-serif;
 /*===========================
     Background Image 
 =============================*/
-.bg_image--1 {
-  background-image: url(../images/bg/bg-image-1.jpg);
-}
-
-.bg_image--2 {
-  background-image: url(../images/bg/bg-image-2.jpg);
-}
-
-.bg_image--3 {
-  background-image: url(../images/bg/bg-image-3.jpg);
-}
-
-.bg_image--4 {
-  background-image: url(../images/bg/bg-image-4.jpg);
+.bg_image-01 {
+  background-image: url('/img/meteor-over-mountain.jpg');
 }
 
 /* Height and width */

@@ -6,20 +6,20 @@
     <!-- Start Category Widget  -->
     <div class="axil-single-widget widget widget_categories mb--30">
         <ul>
-            @foreach (Category category in await _BlogService.GetCategoriesAsync())
+            @foreach (Category category in await _BlogService.GetCategoriesAsync(4))
             {
-            <li class="cat-item">
-                <a href="#" class="inner">
-                    <div class="thumbnail">
-                        <img src="@_ImageService.ConvertByteArrayToFile(
-                            category.ImageData, category.ImageType, DefaultImage.CategoryImage)" 
-                            alt="@category.Name">
-                    </div>
-                    <div class="content">
-                        <h5 class="title">@category.Name</h5>
-                    </div>
-                </a>
-            </li>
+                <li class="cat-item">
+                    <a href="/BlogPosts/FilterByCategory/@category.Id" class="inner">
+                        <div class="thumbnail">
+                            <img src="@_ImageService.ConvertByteArrayToFile(
+                            category.ImageData, category.ImageType, DefaultImage.CategoryImage)"
+                                 alt="@category.Name">
+                        </div>
+                        <div class="content">
+                            <h5 class="title">@category.Name</h5>
+                        </div>
+                    </a>
+                </li>
             }
         </ul>
     </div>
@@ -37,35 +37,35 @@
     <!-- End Search Widget  -->
     <!-- Start Popular Blogs Widget  -->
     <div class="axil-single-widget widget widget_postlist mb--30">
-        <h5 class="widget-title">Popular on Blogar</h5>
+        <h5 class="widget-title">Popular on Pen #> Sword</h5>
         <!-- Start Post List  -->
         <div class="post-medium-block">
-            <!-- Do ForEach loop here-->
             @foreach (BlogPost blogPost in await _BlogService.GetPopularBlogPostsAsync(3))
             {
-            <!-- Start Single Post  -->
-            <div class="content-block post-medium mb--20">
-                <div class="post-thumbnail">
-                    <a href="post-details.html">
-                        <img src="@_ImageService.ConvertByteArrayToFile(blogPost.ImageData, blogPost.ImageType, DefaultImage.BlogPostImage)" 
-                            alt="Post Image">
-                    </a>
-                </div>
-                <div class="post-content">
-                    <h6 class="title">
+                <!-- Start Single Post  -->
+                <div class="content-block post-medium mb--20">
+                    <div class="post-thumbnail">
                         <a href="/Content/@blogPost.Slug">
-                            @blogPost.Title
+                            <img src="@_ImageService.ConvertByteArrayToFile(blogPost.ImageData, blogPost.ImageType, DefaultImage.BlogPostImage)"
+                                 alt="Post Image">
                         </a>
-                    </h6>
-                    <div class="post-meta">
-                        <ul class="post-meta-list">
-                            <li>@blogPost.Created.ToString("MMM dd yyyy")</li>
-                            <li>[*View Count*]</li>
-                        </ul>
+                    </div>
+                    <div class="post-content">
+                        <h6 class="title">
+                            <a href="/Content/@blogPost.Slug">
+                                @blogPost.Title
+                            </a>
+                        </h6>
+                        <div class="post-meta">
+                            <ul class="post-meta-list">
+                                <li><span><i class="bi bi-calendar-event"></i> </span>@blogPost.Created.ToString("MMM dd yyyy")</li>
+                                <li><span><i class="bi bi-card-text"></i> </span>@blogPost.Comments.Count()</li>
+                                <li><span><i class="bi bi-hand-thumbs-up"></i> </span>@blogPost.Likes.Count()</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!-- End Single Post  -->
+                <!-- End Single Post  -->
             }
         </div>
         <!-- End Post List  -->

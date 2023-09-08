@@ -5,9 +5,9 @@ namespace PenSword.Services
 {
     public class ImageService : IImageService
     {
-        private readonly string? _defaultBlogImage = "/img/Sharp-Sword_small.png";
+        private readonly string? _defaultBlogImage = "/img/DefaultBlogImage.png";
         private readonly string? _defaultUserImage = "/img/DefaultUserImage.png";
-        private readonly string? _defaultCategoryImage = "/img/Sharp-Sword_small.png";
+        private readonly string? _defaultCategoryImage = "/img/DefaultCategoryImage.png";
         private readonly string? _blogAuthorImage = "/img/Cadence-Eva-Headshot.jpg";
         public string? ConvertByteArrayToFile(byte[]? fileData, string? extension, DefaultImage defaultImage)
         {

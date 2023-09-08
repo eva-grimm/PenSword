@@ -37,20 +37,9 @@ namespace PenSword.Controllers
 
             int pageSize = 3;
             int page = pageNum ?? 1;
-            IPagedList<BlogPost> blogPosts = await (await _blogService.GetBlogPostsAsync())
+            IPagedList<BlogPost> blogPosts = await (await _blogService.GetPublishedBlogPostsAsync())
                 .ToPagedListAsync(page, pageSize);
             ViewData["ActionName"] = nameof(Index);
-
-            return View(blogPosts);
-        }
-
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AuthorArea(int? pageNum)
-        {
-            int pageSize = 3;
-            int page = pageNum ?? 1;
-            IPagedList<BlogPost> blogPosts = await (await _blogService.GetAllBlogPostsAsync())
-                .ToPagedListAsync(page, pageSize);
 
             return View(blogPosts);
         }
@@ -64,13 +53,13 @@ namespace PenSword.Controllers
             IPagedList<BlogPost> blogPosts = await (await _blogService.GetPopularBlogPostsAsync())
                 .ToPagedListAsync(page, pageSize);
             ViewData["ActionName"] = nameof(PopularBlogs);
-            return View(blogPosts);
+            return View(nameof(Index), blogPosts);
         }
 
         // GET: BlogPosts/Favorites
-        public async Task<IActionResult> FavoriteBlogs(string? blogUserId, int? pageNum)
+        public async Task<IActionResult> FavoriteBlogs(int? pageNum)
         {
-            if (string.IsNullOrEmpty(blogUserId)) return View();
+            string? blogUserId = _userManager.GetUserId(User);
 
             int pageSize = 3;
             int page = pageNum ?? 1;
@@ -82,16 +71,16 @@ namespace PenSword.Controllers
         }
 
         // GET: Filter BlogPosts by Category
-        //public async Task<IActionResult> FilterIndex(string? searchString, int? pageNum)
-        //{
-        //    int pageSize = 3;
-        //    int page = pageNum ?? 1;
-        //    IPagedList<BlogPost> blogPosts = await _blogService.SearchBlogPosts(searchString)
-        //        .ToPagedListAsync(page, pageSize);
-        //    ViewData["ActionName"] = nameof(SearchIndex);
-        //    ViewData["SearchString"] = searchString;
-        //    return View(nameof(Index), blogPosts);
-        //}
+        public async Task<IActionResult> FilterByCategory(int? id, int? pageNum = null)
+        {
+            int pageSize = 3;
+            int page = pageNum ?? 1;
+            IPagedList<BlogPost> blogPosts = await (await _blogService.GetBlogPostsByCategoryAsync(id))
+                .ToPagedListAsync(page, pageSize);
+            ViewData["ActionName"] = nameof(FilterByCategory);
+            ViewData["SearchString"] = (await _blogService.GetSingleCategoryAsync(id)).Name;
+            return View(nameof(Index), blogPosts);
+        }
 
         // GET: Search BlogPosts
         public async Task<IActionResult> SearchIndex(string? searchString, int? pageNum)
@@ -124,18 +113,18 @@ namespace PenSword.Controllers
         [HttpPost]
         public async Task<IActionResult> LikeBlogPost(int? blogPostId, string? blogUserId)
         {
-            BlogUser? blogUser = await _context.Users
-                    .FirstOrDefaultAsync(b => b.Id == blogUserId);
             BlogPost? blogPost = await _context.BlogPosts
                 .FirstOrDefaultAsync(b => b.Id == blogPostId);
+            BlogUser? blogUser = await _context.Users
+                    .FirstOrDefaultAsync(b => b.Id == blogUserId);
             if (blogUser == null || blogPost == null) return NotFound();
 
-            await _blogService.UserClickedLikeButtonAsync(blogPostId!, blogUserId!);
+            await _blogService.UserClickedLikeButtonAsync(blogPostId!.Value, blogUserId!);
 
             return Json(new
             {
-                isLiked = await _blogService.DoesUserLikeBlogAsync(blogPostId!.Value, blogUserId!),
-                count = blogPost.UsersWhoLikeThis.Count()
+                isLiked = await _blogService.DoesUserLikeBlogAsync(blogPostId.Value, blogUserId!),
+                count = blogPost.Likes.Count
             });
         }
 
@@ -201,7 +190,7 @@ namespace PenSword.Controllers
         {
             if (id is null) return NotFound();
 
-            BlogPost? blogPost = await _context.BlogPosts.FindAsync(id);
+            BlogPost? blogPost = await _blogService.GetSingleBlogPostAsync(id); 
             if (blogPost is null) return NotFound();
 
             List<Category> categories = _context.Categories.ToList();
@@ -213,23 +202,26 @@ namespace PenSword.Controllers
         }
 
         // POST: BlogPosts/Edit/5
+        [Authorize(Roles = "Admin")]
         [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Admin")]
-
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Abstract,Content,Created,Updated,Slug,IsPublished,IsDeleted,ImageFile,ImageData,ImageType,CategoryId")] BlogPost blogPost)
         {
             if (id != blogPost.Id) return NotFound();
-
-            // TO-DO: Address slug!
-            ModelState.Remove("Slug");
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    // validate slug before continuing
+                    string? newSlug = StringHelper.BlogPostSlug(blogPost.Title);
+                    if (!await _blogService.ValidSlugAsync(newSlug, blogPost.Id))
+                    {
+                        ModelState.AddModelError("Title", "A similar Title/Slug is already in use.");
+                        ViewData["CategoryId"] = new SelectList(await _blogService.GetCategoriesAsync(), "Id", "Name");
+                        return View(blogPost);
+                    }
+                    blogPost.Slug = newSlug;
                     blogPost.Updated = DateTime.Now;
-
-                    // TO-DO: Address Slug!
-                    blogPost.Slug = string.Empty;
 
                     if (blogPost.ImageFile != null)
                     {
@@ -250,21 +242,6 @@ namespace PenSword.Controllers
             }
 
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", blogPost.CategoryId);
-
-            return View(blogPost);
-        }
-
-        // GET: BlogPosts/Delete/5
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null) return NotFound();
-
-            BlogPost? blogPost = await _blogService.GetSingleBlogPostAsync(id);
-           
-            if (blogPost == null) return NotFound();
-
-            await _blogService.DeleteBlogPostAsync(blogPost.Id);
 
             return View(blogPost);
         }
@@ -295,10 +272,50 @@ namespace PenSword.Controllers
             if (blogPost == null) return NotFound();
 
             blogPost.IsDeleted = !blogPost.IsDeleted;
+            // additionally, if a blog should no longer be published
+            blogPost.IsPublished = false;
 
             await _blogService.UpdateBlogPostAsync(blogPost);
 
             return RedirectToAction(nameof(Details), new { slug = blogPost.Slug });
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AuthorArea(int? pageNum)
+        {
+            int pageSize = 3;
+            int page = pageNum ?? 1;
+            IPagedList<BlogPost> blogPosts = await (await _blogService.GetAllBlogPostsAsync())
+                .ToPagedListAsync(page, pageSize);
+
+            return View(blogPosts);
+        }
+
+        public async Task<IActionResult> AuthorAreaPublishedOnly(int? pageNum)
+        {
+            int pageSize = 3;
+            int page = pageNum ?? 1;
+            IPagedList<BlogPost> blogPosts = await (await _blogService.GetPublishedBlogPostsAsync())
+                .ToPagedListAsync(page, pageSize);
+            return View(nameof(AuthorArea), blogPosts);
+        }
+        
+        public async Task<IActionResult> AuthorAreaDraftOnly(int? pageNum)
+        {
+            int pageSize = 3;
+            int page = pageNum ?? 1;
+            IPagedList<BlogPost> blogPosts = await (await _blogService.GetDraftBlogPostsAsync())
+                .ToPagedListAsync(page, pageSize);
+            return View(nameof(AuthorArea), blogPosts);
+        }
+
+        public async Task<IActionResult> AuthorAreaDeletedOnly(int? pageNum)
+        {
+            int pageSize = 3;
+            int page = pageNum ?? 1;
+            IPagedList<BlogPost> blogPosts = await (await _blogService.GetDeletedBlogPostsAsync())
+                .ToPagedListAsync(page, pageSize);
+            return View(nameof(AuthorArea), blogPosts);
         }
 
         private bool BlogPostExists(int id)

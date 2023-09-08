@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PenSword.Data;
@@ -11,9 +12,11 @@ using PenSword.Data;
 namespace PenSword.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230904195910_0005_FixedLikes")]
+    partial class _0005_FixedLikes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -382,6 +385,7 @@ namespace PenSword.Data.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("BlogUserId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsLiked")
@@ -520,7 +524,9 @@ namespace PenSword.Data.Migrations
 
                     b.HasOne("PenSword.Models.BlogUser", "BlogUser")
                         .WithMany("Likes")
-                        .HasForeignKey("BlogUserId");
+                        .HasForeignKey("BlogUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("BlogPost");
 

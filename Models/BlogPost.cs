@@ -61,6 +61,8 @@ namespace PenSword.Models
         [JsonIgnore]
         public virtual ICollection<Tag> Tags { get; set; } = new HashSet<Tag>();
         [JsonIgnore]
+        public virtual ICollection<Like> Likes { get; set; } = new HashSet<Like>();
+
         public virtual ICollection<BlogUser> UsersWhoLikeThis { get; set; } = new HashSet<BlogUser>();
     }
 }

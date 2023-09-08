@@ -49,24 +49,18 @@ namespace PenSword.Services.Interfaces
             }
         }
 
-        public async Task DeleteBlogPostAsync(int? blogPostId)
-        {
-            BlogPost? blogPost = await _context.BlogPosts.FindAsync(blogPostId);
-            if (blogPost == null) return;
-
-            _context.BlogPosts.Remove(blogPost);
-            await _context.SaveChangesAsync();
-        }
-
         public async Task<BlogPost> GetSingleBlogPostAsync(int? blogPostId)
         {
             if (blogPostId == null) return new BlogPost();
+            
             try
             {
                 BlogPost? blogPost = await _context.BlogPosts
                 .Include(b => b.Category)
                 .Include(b => b.Comments)
                     .ThenInclude(c => c.Author)
+                .Include(b => b.Tags)
+                .Include(b => b.Likes)
                 .FirstOrDefaultAsync(b => b.Id == blogPostId);
                 return blogPost!;
             }
@@ -86,6 +80,7 @@ namespace PenSword.Services.Interfaces
                 .Include(b => b.Comments)
                     .ThenInclude(c => c.Author)
                 .Include(b => b.Tags)
+                .Include(b => b.Likes)
                 .FirstOrDefaultAsync(b => b.Slug == slug);
                 return blogPost!;
             }
@@ -99,13 +94,14 @@ namespace PenSword.Services.Interfaces
         {
             try
             {
-                IEnumerable<BlogPost> blogPosts = await _context.BlogPosts
+                return await _context.BlogPosts
                     .Include(b => b.Category)
                     .Include(b => b.Comments)
                         .ThenInclude(c => c.Author)
                     .Include(b => b.Tags)
+                    .Include(b => b.Likes)
+                    .OrderByDescending(b => b.Created)
                     .ToListAsync();
-                return blogPosts;
             }
             catch (Exception)
             {
@@ -113,19 +109,62 @@ namespace PenSword.Services.Interfaces
             }
         }
 
-        public async Task<IEnumerable<BlogPost>> GetBlogPostsAsync()
+        public async Task<IEnumerable<BlogPost>> GetPublishedBlogPostsAsync()
         {
             try
             {
-                IEnumerable<BlogPost> blogPosts = await _context.BlogPosts
-                    .Where(b => b.IsPublished == true
-                        && b.IsDeleted == false)
+                return await _context.BlogPosts
+                    .Where(b => b.IsPublished
+                        && !b.IsDeleted)
                     .Include(b => b.Category)
                     .Include(b => b.Comments)
                         .ThenInclude(c => c.Author)
                     .Include(b => b.Tags)
+                    .Include(b => b.Likes)
+                    .OrderByDescending(b => b.Created)
                     .ToListAsync();
-                return blogPosts;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<BlogPost>> GetDraftBlogPostsAsync()
+        {
+            try
+            {
+                return await _context.BlogPosts
+                    .Where(b => !b.IsPublished
+                        && !b.IsDeleted)
+                    .Include(b => b.Category)
+                    .Include(b => b.Comments)
+                        .ThenInclude(c => c.Author)
+                    .Include(b => b.Tags)
+                    .Include(b => b.Likes)
+                    .OrderByDescending(b => b.Created)
+                    .ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<BlogPost>> GetDeletedBlogPostsAsync()
+        {
+            try
+            {
+                return await _context.BlogPosts
+                    .Where(b => !b.IsPublished
+                        && b.IsDeleted)
+                    .Include(b => b.Category)
+                    .Include(b => b.Comments)
+                        .ThenInclude(c => c.Author)
+                    .Include(b => b.Tags)
+                    .Include(b => b.Likes)
+                    .OrderByDescending(b => b.Created)
+                    .ToListAsync();
             }
             catch (Exception)
             {
@@ -137,9 +176,10 @@ namespace PenSword.Services.Interfaces
         {
             try
             {
-                IEnumerable<BlogPost> blogPosts = await GetBlogPostsAsync();
+                IEnumerable<BlogPost> blogPosts = await GetPublishedBlogPostsAsync();
+                count ??= blogPosts.Count();
 
-                return blogPosts.OrderByDescending(b => b.Comments.Count).Take(count!.Value);
+                return blogPosts.OrderByDescending(b => b.Comments.Count).Take(count.Value);
             }
             catch (Exception)
             {
@@ -151,12 +191,55 @@ namespace PenSword.Services.Interfaces
         {
             try
             {
-                if (!string.IsNullOrEmpty(blogUserId))
+                IEnumerable<BlogPost> blogPosts = new List<BlogPost>();
+
+                if (string.IsNullOrEmpty(blogUserId)) return blogPosts;
+
+                BlogUser? blogUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Id == blogUserId);
+                if (blogUser == null) return blogPosts;
+
+                blogPosts = await _context.BlogPosts
+                    .Where(b => b.IsPublished == true
+                        && b.IsDeleted == false
+                        && b.Likes.Any(l => l.BlogUserId == blogUserId
+                            && l.IsLiked))
+                    .Include(b => b.Category)
+                    .Include(b => b.Comments)
+                        .ThenInclude(c => c.Author)
+                    .Include(b => b.Tags)
+                    .Include(b => b.Likes)
+                    .OrderByDescending(b => b.Created)
+                    .ToListAsync();
+                return blogPosts;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<BlogPost>> GetBlogPostsByCategoryAsync(int? categoryId)
+        {
+            try
+            {
+                if (categoryId != null)
                 {
-                    BlogUser? blogUser = await _context.Users
-                        .FirstOrDefaultAsync(u => u.Id == blogUserId);
-                    if (blogUser != null) return blogUser.LikedBlogPosts
-                            .OrderByDescending(b => b.Created);
+                    Category? category = await _context.Categories
+                        .FirstOrDefaultAsync(c => c.Id == categoryId);
+                    if (category != null)
+                    {
+                        IEnumerable<BlogPost> blogPosts = await _context.BlogPosts
+                            .Where(b => b.IsPublished == true
+                                && b.IsDeleted == false
+                                && b.CategoryId == categoryId)
+                            .Include(b => b.Category)
+                            .Include(b => b.Comments)
+                                .ThenInclude(c => c.Author)
+                            .Include(b => b.Tags)
+                            .ToListAsync();
+                        return blogPosts;
+                    }
                 }
                 return Enumerable.Empty<BlogPost>();
             }
@@ -221,13 +304,16 @@ namespace PenSword.Services.Interfaces
             }
         }
 
-        public async Task<IEnumerable<Category>> GetCategoriesAsync()
+        public async Task<IEnumerable<Category>> GetCategoriesAsync(int? count = null)
         {
             try
             {
                 IEnumerable<Category> categories = await _context.Categories
+                    .Include(c => c.BlogPosts)
                     .ToListAsync();
-                return categories;
+                count ??= categories.Count();
+
+                return categories.Take(count.Value);
             }
             catch (Exception)
             {
@@ -384,14 +470,12 @@ namespace PenSword.Services.Interfaces
         {
             try
             {
-                BlogUser? blogUser = await _context.Users
-                    .FirstOrDefaultAsync(b => b.Id == blogUserId);
-                BlogPost? blogPost = await _context.BlogPosts
-                    .FirstOrDefaultAsync(b => b.Id == blogPostId);
-                if (blogUser == null || blogPost == null) return false;
-
-                if (blogPost.UsersWhoLikeThis.Contains(blogUser)) return true;
-                else return false;
+                Like? like = await _context.Likes
+                    .FirstOrDefaultAsync(l => l.BlogPostId == blogPostId
+                        && l.BlogUserId == blogUserId
+                        && l.IsLiked);
+                if (like == null) return false;
+                else return true;
             }
             catch (Exception)
             {
@@ -399,27 +483,28 @@ namespace PenSword.Services.Interfaces
             }
         }
 
-        public async Task UserClickedLikeButtonAsync(int? blogPostId, string? blogUserId)
+        public async Task UserClickedLikeButtonAsync(int blogPostId, string blogUserId)
         {
             try
             {
-                BlogUser? blogUser = await _context.Users
-                    .FirstOrDefaultAsync(b => b.Id == blogUserId);
-                BlogPost? blogPost = await _context.BlogPosts
-                    .FirstOrDefaultAsync(b => b.Id == blogPostId);
-                if (blogUser == null || blogPost == null) return;
-                // if user already likes blog, then clicking button unlikes the blog
-                else if (await DoesUserLikeBlogAsync(blogPostId!.Value, blogUserId!))
+                Like? like = await _context.Likes
+                        .FirstOrDefaultAsync(l => l.BlogPostId == blogPostId && l.BlogUserId == blogUserId);
+
+                // if null, create Like and set IsLiked to true
+                if (like == null)
                 {
-                    blogPost.UsersWhoLikeThis.Remove(blogUser);
-                    _context.Update(blogPost);
+                    like = new Like
+                    {
+                        BlogPostId = blogPostId,
+                        BlogUserId = blogUserId,
+                        IsLiked = true,
+                    };
+                    _context.Add(like);
                 }
-                // otherwise, clicking button likes the blog
-                else
-                {
-                    blogPost.UsersWhoLikeThis.Add(blogUser);
-                    _context.Update(blogPost);
-                }
+                // otherwise, delete 
+                else _context.Remove(like);
+
+                await _context.SaveChangesAsync();
             }
             catch (Exception)
             {

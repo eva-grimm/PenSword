@@ -5,12 +5,51 @@
 @inject IImageService _ImageService
 
 @{
+    ViewData["Title"] = "Categories";
 }
 
 <!-- Start Post List Wrapper  -->
 <div class="axil-post-list-area axil-section-gap bg-color-white">
     <div class="container">
         <a asp-action="Create" asp-controller="BlogPosts" class="axil-button button-rounded btn-primary mb-5">New Blog Post</a>
+        <!-- Start Author Area Filters -->
+        @* <div class="axil-single-widget widget widget_categories mb--30"> *@
+        <div class="mainmenu-wrapper">
+            <nav class="mainmenu-nav">
+                <ul class="mainmenu">
+                    <li>
+                        <a asp-action="AuthorArea" class="inner">
+                            <div class="content">
+                                <h5 class="title">All Blogs</h5>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="AuthorAreaPublishedOnly" class="inner">
+                            <div class="content">
+                                <h5 class="title">Published Blogs</h5>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="AuthorAreaDraftOnly" class="inner">
+                            <div class="content">
+                                <h5 class="title">Draft Blogs</h5>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="AuthorAreaDeletedOnly" class="inner">
+                            <div class="content">
+                                <h5 class="title">Deleted Blogs</h5>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        @* </div> *@
+        <!-- End Author Area Filters -->
         <!-- Start Post List  -->
         @foreach (BlogPost blogPost in Model)
         {
@@ -70,7 +109,7 @@
                             @if (!blogPost.IsDeleted)
                             {
                                 <a asp-action="TogglePublish" asp-controller="BlogPosts" asp-route-id="@blogPost.Id"
-                                    class="w-75 btn btn-outline-success">
+                                   class="w-75 btn btn-outline-success">
                                     @if (!blogPost.IsPublished)
                                     {
                                         <span>Publish</span>
@@ -82,9 +121,9 @@
                                 </a>
                             }
                             <a asp-action="Edit" asp-controller="BlogPosts" asp-route-id="@blogPost.Id"
-                                class="w-75 btn btn-outline-warning">Edit</a>
+                               class="w-75 btn btn-outline-warning">Edit</a>
                             <a asp-action="ToggleDelete" asp-controller="BlogPosts" asp-route-id="@blogPost.Id"
-                                class="w-75 btn btn-outline-danger">
+                               class="w-75 btn btn-outline-danger">
                                 @if (blogPost.IsDeleted)
                                 {
                                     <span>Undelete</span>

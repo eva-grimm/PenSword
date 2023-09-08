@@ -102,13 +102,7 @@ body {
     width: 120px!important;
 }
 
-.editIcons {
-    font-size: 1.5rem;
-    opacity: .9;
+.user-thumbnail {
+    height: 60px!important;
+    width: 60px!important;
 }
-
-    .editIcons:hover {
-        font-weight: bold;
-        opacity: 1;
-        cursor: pointer;
-    }

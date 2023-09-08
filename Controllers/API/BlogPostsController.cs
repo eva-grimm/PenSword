@@ -15,11 +15,18 @@ namespace PenSword.Controllers.API
             _blogService = blogService;
         }
 
-        // GET: api/BlogPosts
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<BlogPost>>> GetBlogPosts()
+        /// <summary>
+        /// This endpoint will return the specified number of mostly recently published blog posts.
+        /// The count parameter indicates how many of the recent posts to return.
+        /// The maximum number of blog posts allowed per request is 10.
+        /// </summary>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        [HttpGet("{count:int}")]
+        public async Task<ActionResult<IEnumerable<BlogPost>>> GetBlogPosts(int count)
         {
-            IEnumerable<BlogPost> blogPosts = (await _blogService.GetBlogPostsAsync()).Take(4);
+            if (count > 10) count = 10;
+            IEnumerable<BlogPost> blogPosts = (await _blogService.GetPublishedBlogPostsAsync()).Take(count);
 
             return Ok(blogPosts);
         }

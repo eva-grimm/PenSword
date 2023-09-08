@@ -2,29 +2,51 @@
 @inject IImageService _ImageService;
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "List of Categories";
 }
 
-<div class="post-single-wrapper axil-section-gap bg-color-white">
-    <div class="container text-end mb-3">
-        <a class="btn btn-primary rounded-pill" asp-action="create" asp-controller="notes">Add<i class="bi bi-person-plus-fill ps-2"></i></a>
-    </div>
-    <div class="container mt-5">
-        <div id="notes-list" class="row row-cols-1 row-cols-md-2 g-3 mb-3">
-            @foreach (Category category in Model)
-            {
-                <div class="card" style="width: 18rem;">
-                    <img src="@_ImageService.ConvertByteArrayToFile(category.ImageData, category.ImageType, DefaultImage.CategoryImage)"
-                         class="card-img-top" alt="@category.Name">
-                    <div class="card-body">
-                        <h5 class="card-title">@category.Name</h5>
-                    </div>
-                    <div class="card-footer">
-                        <a class="me-3 editIcons" asp-controller="Categories" asp-action="Edit" asp-route-id="@category.Id"><i class="bi bi-pencil-square"></i></a>
-                        <a class="me-3 editIcons" asp-controller="Categories" asp-action="Delete" asp-route-id="@category.Id"><i class="bi bi-trash-fill"></i></a>
+<!-- Start Post List Wrapper  -->
+<div class="axil-post-list-area axil-section-gap bg-color-white">
+    <div class="container">
+        <a asp-action="Create" asp-controller="Categories" class="axil-button button-rounded btn-primary mb-5">New Category</a>
+        <!-- Start Category List  -->
+        @foreach (Category category in Model)
+        {
+            <div class="row my-3">
+                <div class="col-lg-8 col-xl-8">
+                    <div class="content-block post-list-view mt--30">
+                        <div class="post-thumbnail">
+                            <img src="@_ImageService.ConvertByteArrayToFile(category.ImageData, category.ImageType, DefaultImage.CategoryImage)" alt="Category Image">
+                        </div>
+                        <div class="post-content">
+                            <h4 class="title">
+                                <span data-text="@category.Name">@category.Name</span>
+                            </h4>
+                            <div class="post-meta-wrapper">
+                                <div class="post-meta">
+                                    <div class="content">
+                                        <p>@category.Description</p>
+                                        <ul class="post-meta-list">
+                                            <li>Posts: @category.BlogPosts.Count()</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            }
-        </div>
+                <div class="col-lg-4 col-xl-4">
+                    <div class="content-block post-list-view mt--30 h-100">
+                        <div class="post-content d-flex flex-column gap-3 align-items-center">
+                            <a asp-action="Edit" asp-controller="Categories" asp-route-id="@category.Id"
+                               class="w-75 btn btn-outline-warning">Edit</a>
+                            <a asp-action="Delete" asp-controller="Categories" asp-route-id="@category.Id"
+                               class="w-75 btn btn-outline-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <!-- End Category List  -->
     </div>
 </div>

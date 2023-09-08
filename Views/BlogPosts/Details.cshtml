@@ -116,7 +116,7 @@
                                 {
                                     <i id="faThumb" class="fal fa-thumbs-up"></i>
                                 }
-                                <span id="numLikes">@Model.UsersWhoLikeThis.Count() Likes</span>
+                                <span id="numLikes">@Model.Likes.Count() Likes</span>
                             </a>
                         </div>
                         @* <ul class="social-icon icon-rounded-transparent md-size">
@@ -199,7 +199,7 @@
                                                     </div>
                                                     <div class="comment-text">
                                                         <p class="b2">
-                                                            @Html.Raw(comment.Body);
+                                                            @Html.Raw(comment.Body)
                                                         </p>
                                                     </div>
                                                 </div>

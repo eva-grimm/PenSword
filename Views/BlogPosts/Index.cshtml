@@ -5,7 +5,7 @@
 @inject IImageService _ImageService
 
 @{
-    ViewData["Title"] = "Pen #> Sword";
+    ViewData["Title"] = "Posts";
     string? actionName = ViewBag.ActionName;
     string? searchString = ViewBag.SearchString;
 
@@ -18,14 +18,16 @@
         case "SearchIndex":
             pageTitle = $"Search for '{searchString}'";
             break;
-        case "Popular":
+        case "FilterByCategory":
+            pageTitle = $"{searchString} Blogs Only";
+            break;
+        case "PopularBlogs":
             pageTitle = "Popular Posts";
             break;
-        case "Favorites":
+        case "FavoriteBlogs":
             pageTitle = "Favorite Posts";
             break;
     }
-
 }
 
 <!-- Start Author Area  -->
