@@ -56,6 +56,11 @@ body {
 }
 /* #endregion PagedList styling */
 
+.blog-title {
+    font-weight: bolder;
+    font-size: larger;
+}
+
 .tagcloud > .disabledTag {
     background-color: lightgray;
     color: gray;
