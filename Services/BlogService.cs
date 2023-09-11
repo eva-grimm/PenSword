@@ -295,7 +295,8 @@ namespace PenSword.Services.Interfaces
             try
             {
                 Category? category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == categoryId);
+                    .Include(c => c.BlogPosts)
+                    .FirstOrDefaultAsync(c => c.Id == categoryId);
                 return category!;
             }
             catch (Exception)

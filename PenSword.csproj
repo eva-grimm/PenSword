@@ -21,6 +21,7 @@
   <ItemGroup>
     <Content Remove="Views\BlogPosts\OriginalIndex-Backup.cshtml" />
     <Content Remove="Views\Shared\_OriginalLayout-Backup.cshtml" />
+    <Content Remove="wwwroot\img\Each Wail and Each Moan.png" />
   </ItemGroup>
 
   <ItemGroup>

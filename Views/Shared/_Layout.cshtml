@@ -22,6 +22,9 @@
     <link rel="stylesheet" href="~/assets/css/plugins/plugins.css">
     <link rel="stylesheet" href="~/assets/css/style.css">
     <link rel="stylesheet" href="~/css/site.css">
+
+    <!-- TinyMCE -->
+    <script src="https://cdn.tiny.cloud/1/ucqzpmpwmqslx36vd3od080p58srtac0rerc89bbfedkzpmg/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 </head>
 <body>
     <partial name="_LogoutPartial" />
@@ -51,8 +54,8 @@
                     <div class="col-xl-3 col-lg-3 col-md-4 col-sm-3 col-12">
                         <div class="logo">
                             <a asp-controller="BlogPosts" asp-action="Index" class="d-flex align-items-center">
-                                <img src="~/img/Pen-Sword.png" alt="Logo Image" class="me-3" style="border-radius: 5px;">
-                                <span class="blog-title">Pen #> Sword</span>
+                                <img class="dark-logo" src="~/img/Pen-Sword_Title-Logo_Light.png" alt="Logo Image" style="border-radius: 5px;">
+                                <img class="light-logo" src="~/img/Pen-Sword_Title-Logo_Dark.png" alt="Logo Image" style="border-radius: 5px;">
                             </a>
                         </div>
                     </div>
@@ -216,7 +219,8 @@
                 <div class="mobile-menu-top">
                     <div class="logo">
                         <a asp-controller="BlogPosts" asp-action="Index">
-                            <img src="~/img/Pen-Sword_Title-Logo.png" alt="Logo Image">
+                            <img class="dark-logo" src="~/img/Pen-Sword_Title-Logo_Light.png" alt="Logo Image" style="border-radius: 5px;">
+                            <img class="light-logo" src="~/img/Pen-Sword_Title-Logo_Dark.png" alt="Logo Image" style="border-radius: 5px;">
                         </a>
                     </div>
                     <div class="mobile-close">
@@ -261,9 +265,45 @@
         @RenderBody()
 
         <!-- Start Footer Area  -->
-        <div class="axil-footer-area axil-footer-style-1 bg-color-white">
+        <div class="axil-footer-area axil-footer-style-1 footer-variation-three">
             <!-- Start Footer Top Area -->
             <div class="footer-top">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4">
+                            <div class="logo">
+                                <a asp-controller="BlogPosts" asp-action="Index" class="d-flex align-items-center">
+                                    <img class="dark-logo" src="~/img/Pen-Sword_Title-Logo_Light.png" alt="Logo Image" style="border-radius: 5px;">
+                                    <img class="white-logo" src="~/img/Pen-Sword_Title-Logo_Dark.png" alt="Logo Image" style="border-radius: 5px;">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-lg-8 col-md-8">
+                            <!-- Start Post List  -->
+                            <div class="d-flex justify-content-start mt_sm--15 justify-content-md-end align-items-center flex-wrap">
+                                <h5 class="follow-title mb--0 mr--20">Follow Us</h5>
+                                <ul class="social-icon color-tertiary md-size justify-content-start">
+                                    <li>
+                                        <a href="https://www.linkedin.com/in/cadence-eva-custin/" alt="linkedin">
+                                            <i class="fab fa-linkedin-in"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="https://github.com/eva-grimm" alt="github">
+                                            <i class="bi bi-github"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="mailto:eva.custin@gmail.com" alt="email">
+                                            <i class="bi bi-envelope-at"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- End Post List  -->
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- End Footer Top Area -->
             <!-- Start Copyright Area  -->
@@ -272,12 +312,15 @@
                     <div class="row align-items-center">
                         <div class="col-lg-4 col-md-12">
                             <div class="copyright-left">
-                                <div class="logo" style="text-align: center; margin-bottom: 20px">
-                                    <a asp-controller="BlogPosts" asp-action="Index" class="d-flex align-items-center">
-                                        <img src="~/img/Pen-Sword.png" alt="Logo Image" class="me-3" style="border-radius: 5px;">
-                                        <span class="blog-title">Pen #> Sword</span>
-                                    </a>
-                                </div>
+                                <ul class="mainmenu justify-content-start">
+                                    <li>
+                                        <a class="hover-flip-item-wrapper" asp-controller="Home" asp-action="ContactMe">
+                                            <span class="hover-flip-item">
+                                                <span data-text="Contact Us">Contact Us</span>
+                                            </span>
+                                        </a>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                         <div class="col-lg-8 col-md-12">

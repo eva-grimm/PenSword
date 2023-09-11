@@ -56,7 +56,7 @@
                 <div class="col-12 col-lg-8">
                     <div class="form-group">
                         <label asp-for="Content" class="control-label"></label>
-                        <textarea asp-for="Content" class="editor form-control"></textarea>
+                        <textarea asp-for="Content" id="content" class="form-control"></textarea>
                         <span asp-validation-for="Content" class="text-danger"></span>
                     </div>
                     <div class="form-group" id="tagContainer">
@@ -99,15 +99,15 @@
                 items: [
                     'findAndReplace', 'selectAll', '|',
                     'heading', '|',
-                    'bold', 'italic', 'strikethrough', 'underline', 'code', 'subscript', 'superscript', 'removeFormat', '|',
+                    'bold', 'italic', 'strikethrough', 'underline', 'code', 'removeFormat', '|',
                     'bulletedList', 'numberedList', 'todoList', '|',
                     'outdent', 'indent', '|',
                     'undo', 'redo',
                     '-',
                     'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'highlight', '|',
                     'alignment', '|',
-                    'link', 'insertImage', 'blockQuote', 'insertTable', 'mediaEmbed', 'codeBlock', 'htmlEmbed', '|',
-                    'specialCharacters', 'horizontalLine', 'pageBreak', '|',
+                    'link', 'insertImage', 'blockQuote', 'insertTable', 'codeBlock', '|',
+                    'specialCharacters', 'horizontalLine', '|',
                 ],
                 shouldNotGroupWhenFull: true
             },
@@ -181,6 +181,27 @@
                 'Pagination',
                 'WProofreader',
             ]
+        });
+    </script>
+
+    <script>
+        tinymce.init({
+            selector: 'textarea#content',
+            plugins: 'ai tinycomments mentions anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed permanentpen footnotes advtemplate advtable advcode editimage tableofcontents mergetags powerpaste tinymcespellchecker autocorrect a11ychecker typography inlinecss',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image imageupload media table mergetags | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap codesample | removeformat |',
+            tinycomments_mode: 'embedded',
+            tinycomments_author: 'Author name',
+            mergetags_list: [
+                { value: 'First.Name', title: 'First Name' },
+                { value: 'Email', title: 'Email' },
+            ],
+            codesample_languages: [
+                { text: 'HTML/XML', value: 'markup' },
+                { text: 'JavaScript', value: 'javascript' },
+                { text: 'CSS', value: 'css' },
+                { text: 'C#', value: 'csharp' },
+            ],
+            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant")),
         });
     </script>
 
