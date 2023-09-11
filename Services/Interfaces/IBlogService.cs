@@ -7,6 +7,7 @@ namespace PenSword.Services.Interfaces
 {
     public interface IBlogService
     {
+        public bool BlogPostExists(int blogPostId);
         public Task AddBlogPostAsync(BlogPost? blogPost);
         public Task UpdateBlogPostAsync(BlogPost? blogPost);
         public Task<BlogPost> GetSingleBlogPostAsync(int? blogPostId);
@@ -29,7 +30,6 @@ namespace PenSword.Services.Interfaces
         public Task RemoveAllBlogPostTagsAsync(int? blogPostId);
         public IEnumerable<BlogPost> SearchBlogPosts(string? searchString);
         public Task<bool> ValidSlugAsync(string? title, int? blogPostId);
-        public Task<bool> DoesUserLikeBlogAsync(int blogPostId, string blogUserId);
         public Task UserClickedLikeButtonAsync(int blogPostId, string blogUserId);
     }
 }

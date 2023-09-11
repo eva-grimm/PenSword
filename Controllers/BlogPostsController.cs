@@ -13,19 +13,19 @@ namespace PenSword.Controllers
 {
     public class BlogPostsController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly UserManager<BlogUser> _userManager;
         private readonly IBlogService _blogService;
+        private readonly IUserService _userService;
         private readonly IImageService _imageService;
 
-        public BlogPostsController(ApplicationDbContext context,
-            UserManager<BlogUser> userManager,
+        public BlogPostsController(UserManager<BlogUser> userManager,
             IBlogService blogService,
+            IUserService userService,
             IImageService imageService)
         {
-            _context = context;
             _userManager = userManager;
             _blogService = blogService;
+            _userService = userService;
             _imageService = imageService;
         }
 
@@ -113,28 +113,26 @@ namespace PenSword.Controllers
         [HttpPost]
         public async Task<IActionResult> LikeBlogPost(int? blogPostId, string? blogUserId)
         {
-            BlogPost? blogPost = await _context.BlogPosts
-                .FirstOrDefaultAsync(b => b.Id == blogPostId);
-            BlogUser? blogUser = await _context.Users
-                    .FirstOrDefaultAsync(b => b.Id == blogUserId);
+            BlogPost? blogPost = await _blogService.GetSingleBlogPostAsync(blogPostId);
+            BlogUser? blogUser = await _userService.GetUserByIdAsync(blogUserId);
             if (blogUser == null || blogPost == null) return NotFound();
 
             await _blogService.UserClickedLikeButtonAsync(blogPostId!.Value, blogUserId!);
 
             return Json(new
             {
-                isLiked = await _blogService.DoesUserLikeBlogAsync(blogPostId.Value, blogUserId!),
+                isLiked = await _userService.DoesUserLikeBlogAsync(blogPostId.Value, blogUserId!),
                 count = blogPost.Likes.Count
             });
         }
 
         // GET: BlogPosts/Create
         [Authorize(Roles = "Admin")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            List<Category> categories = _context.Categories.ToList();
+            List<Category> categories = (await _blogService.GetCategoriesAsync()).ToList();
             ViewData["CategoryList"] = new SelectList(categories, "Id", "Name");
-            List<Tag> tags = _context.Tags.ToList();
+            List<Tag> tags = (await _blogService.GetTagsAsync()).ToList();
             ViewData["TagList"] = new MultiSelectList(tags, "Id", "Name");
             return View();
         }
@@ -177,10 +175,11 @@ namespace PenSword.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            List<Category> categories = _context.Categories.ToList();
+            List<Category> categories = (await _blogService.GetCategoriesAsync()).ToList();
             ViewData["CategoryList"] = new SelectList(categories, "Id", "Name");
-            List<Tag> tags = _context.Tags.ToList();
+            List<Tag> tags = (await _blogService.GetTagsAsync()).ToList();
             ViewData["TagList"] = new MultiSelectList(tags, "Id", "Name");
+
             return View(blogPost);
         }
 
@@ -193,10 +192,10 @@ namespace PenSword.Controllers
             BlogPost? blogPost = await _blogService.GetSingleBlogPostAsync(id); 
             if (blogPost is null) return NotFound();
 
-            List<Category> categories = _context.Categories.ToList();
+            List<Category> categories = (await _blogService.GetCategoriesAsync()).ToList();
             ViewData["CategoryList"] = new SelectList(categories, "Id", "Name");
-            List<Tag> tags = _context.Tags.ToList();
-            ViewData["CategoryList"] = new MultiSelectList(tags, "Id", "Name");
+            List<Tag> tags = (await _blogService.GetTagsAsync()).ToList();
+            ViewData["TagList"] = new MultiSelectList(tags, "Id", "Name");
 
             return View(blogPost);
         }
@@ -235,13 +234,17 @@ namespace PenSword.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!BlogPostExists(blogPost.Id)) return NotFound();
+                    if (!_blogService.BlogPostExists(blogPost.Id)) return NotFound();
                     else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", blogPost.CategoryId);
+            List<Category> categories = (await _blogService.GetCategoriesAsync()).ToList();
+            ViewData["CategoryList"] = new SelectList(categories, "Id", "Name");
+            List<Tag> tags = (await _blogService.GetTagsAsync()).ToList();
+            ViewData["TagList"] = new MultiSelectList(tags, "Id", "Name");
+
 
             return View(blogPost);
         }
@@ -316,11 +319,6 @@ namespace PenSword.Controllers
             IPagedList<BlogPost> blogPosts = await (await _blogService.GetDeletedBlogPostsAsync())
                 .ToPagedListAsync(page, pageSize);
             return View(nameof(AuthorArea), blogPosts);
-        }
-
-        private bool BlogPostExists(int id)
-        {
-            return (_context.BlogPosts?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

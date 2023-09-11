@@ -1,12 +1,14 @@
-﻿@using Microsoft.AspNetCore.Identity;
-@model BlogPost
-@inject UserManager<BlogUser> _userManager;
-@inject IImageService _ImageService;
-@inject IBlogService _BlogService;
+﻿@model BlogPost
+@inject UserManager<BlogUser> _userManager
+@inject IImageService _ImageService
+@inject IBlogService _BlogService
+@inject IUserService _UserService
 
 @{
     ViewData["Title"] = "Details";
-    bool isLiked = await _BlogService.DoesUserLikeBlogAsync(Model.Id, _userManager.GetUserId(User)!);
+    bool isLiked = await _UserService.DoesUserLikeBlogAsync(Model.Id, _userManager.GetUserId(User)!);
+
+    int count = Model.Likes.Count();
 }
 
 <style>
@@ -116,15 +118,9 @@
                                 {
                                     <i id="faThumb" class="fal fa-thumbs-up"></i>
                                 }
-                                <span id="numLikes">@Model.Likes.Count() Likes</span>
+                                <span id="numLikes">@count Likes</span>
                             </a>
                         </div>
-                        @* <ul class="social-icon icon-rounded-transparent md-size">
-                        <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-                        <li><a href="#"><i class="fab fa-instagram"></i></a></li>
-                        <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                        <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
-                        </ul> *@
                     </div>
                     <!-- Start Author  -->
                     <partial name="_AuthorAreaPartial" />

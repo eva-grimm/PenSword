@@ -18,6 +18,11 @@ namespace PenSword.Services.Interfaces
             _context = context;
         }
 
+        public bool BlogPostExists(int blogPostId)
+        {
+            return (_context.BlogPosts?.Any(e => e.Id == blogPostId)).GetValueOrDefault();
+        }
+
         public async Task AddBlogPostAsync(BlogPost? blogPost)
         {
             if (blogPost == null) return;
@@ -460,23 +465,6 @@ namespace PenSword.Services.Interfaces
                     }
                 }
                 return true;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<bool> DoesUserLikeBlogAsync(int blogPostId, string blogUserId)
-        {
-            try
-            {
-                Like? like = await _context.Likes
-                    .FirstOrDefaultAsync(l => l.BlogPostId == blogPostId
-                        && l.BlogUserId == blogUserId
-                        && l.IsLiked);
-                if (like == null) return false;
-                else return true;
             }
             catch (Exception)
             {

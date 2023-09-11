@@ -17,10 +17,6 @@ html {
     min-height: 100%;
 }
 
-body {
-    margin-bottom: 60px;
-}
-
 /* #region PagedList styling */
 .my-page-item {
     display: inline-block;

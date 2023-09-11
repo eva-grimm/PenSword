@@ -106,8 +106,7 @@ namespace PenSword.Controllers
             return View(category);
         }
 
-        // POST: Categories/Delete/5
-        [HttpPost,ValidateAntiForgeryToken]
+        // Categories/DeleteConfirmed/5
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.Categories == null)
