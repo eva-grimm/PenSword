@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -24,9 +23,23 @@ namespace PenSword.Models
         public byte[]? ImageData { get; set; }
         public string? ImageType { get; set; }
 
-        //Navigation Properties
+        // Author Details
+        public string? JobTitle { get; set; }
+        public string? Company { get; set; }
+        public string? Byline { get; set; }
+        public string? Bio { get; set; }
+
+        // Socials
+        public string? LinkedIn { get; set; }
+        public string? GitHub { get; set; }
+        public string? Twitter { get; set; }
+        public string? Facebook { get; set; }
+        public string? Instagram { get; set; }
+        public string? Website { get; set; }
+
+        // Navigation Properties
         public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
         public virtual ICollection<Like> Likes { get; set; } = new HashSet<Like>();
-        public virtual ICollection<BlogPost> PostsUserLikes { get; set; } = new HashSet<BlogPost>();
+        public virtual ICollection<BlogPost> Authored { get; set; } = new HashSet<BlogPost>();
     }
 }

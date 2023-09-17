@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using PenSword.Controllers;
+using PenSword.Enums;
 using PenSword.Data;
 using PenSword.Models;
 using PenSword.Services;
@@ -28,6 +28,26 @@ builder.Services.AddIdentity<BlogUser, IdentityRole>(options => options.SignIn.R
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<IEmailSender, EmailService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ITagService, TagService>();
+
+// custom role policy
+builder.Services.AddAuthorization(options =>
+{
+    // AdAuth Policy - Requries Admin or Author role
+    options.AddPolicy(nameof(Policies.AdAuth), policy =>
+        policy.RequireRole(nameof(Roles.Admin),
+            nameof(Roles.Author)));
+    // NoReg Policy - Requries Admin, Author, or Moderator role
+    // i.e., any role and therefore not regular user
+    options.AddPolicy(nameof(Policies.AdAuth), policy =>
+        policy.RequireRole(nameof(Roles.Admin),
+            nameof(Roles.Author),
+            nameof(Roles.Moderator)));
+});
 
 builder.Services.AddMvc();
 

@@ -1,35 +1,46 @@
-﻿@model IEnumerable<PenSword.Models.Tag>
+﻿@model IEnumerable<Tag>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "List of Tags";
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<!-- Start Post List Wrapper  -->
+<div class="axil-post-list-area axil-section-gap bg-color-white">
+    <div class="container">
+        <a asp-action="Create" asp-controller="Categories" class="axil-button button-rounded btn-primary mb-5">New Category</a>
+        <!-- Start Tag List  -->
+        @foreach (Tag tag in Model)
+        {
+            <div class="row my-3">
+                <div class="col-lg-8 col-xl-8">
+                    <div class="content-block post-list-view mt--30">
+                        <div class="post-content">
+                            <h4 class="title">
+                                <span data-text="@tag.Name">@tag.Name</span>
+                            </h4>
+                            <div class="post-meta-wrapper">
+                                <div class="post-meta">
+                                    <div class="content">
+                                        <ul class="post-meta-list">
+                                            <li>Used on @tag.BlogPosts.Count() posts</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-xl-4">
+                    <div class="content-block post-list-view mt--30 h-100">
+                        <div class="post-content d-flex flex-column gap-3 align-items-center">
+                            <a asp-action="Delete" asp-controller="Tags" asp-route-id="@tag.Id"
+                               class="w-75 btn btn-outline-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        <!-- End Tag List  -->
+    </div>
+</div>
+<!-- End Post List Wrapper  -->

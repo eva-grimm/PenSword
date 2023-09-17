@@ -1,4 +1,5 @@
-﻿@inject IImageService _ImageService;
+﻿@model BlogUser
+@inject IImageService _ImageService;
 
 <div class="axil-author-area axil-author-banner bg-color-grey">
     <div class="container">
@@ -7,36 +8,88 @@
                 <div class="about-author">
                     <div class="media">
                         <div class="thumbnail">
-                            <a href="#">
-                                <img src="@_ImageService.ConvertByteArrayToFile(null, null, DefaultImage.AuthorImage)"
+                            <a asp-controller="Home" asp-action="ShowAuthorProfile" 
+                                asp-route-authorId="@Model.Id">
+                                <img src="@_ImageService.ConvertByteArrayToFile(Model.ImageData, Model.ImageType, DefaultImage.AuthorImage)"
                                      class="author-thumbnail" alt="Author Image">
                             </a>
                         </div>
                         <div class="media-body">
                             <div class="author-info">
-                                <h1 class="title"><a href="#">Cadence Eva Custin</a></h1>
-                                <span class="b3 subtitle">Full-Stack Developer</span>
+                                <h1 class="title">
+                                    <a asp-controller="Home" asp-action="ShowAuthorProfile"
+                                       asp-route-authorId="@Model.Id">@Model.FullName</a>
+                                </h1>
+                                @if (Model?.JobTitle != null && Model?.Company != null)
+                                {
+                                    <span class="b3 subtitle">@Model.JobTitle at @Model.Company</span>
+                                }
+                                else if (Model?.JobTitle != null)
+                                {
+                                    <span class="b3 subtitle">@Model.JobTitle</span>
+                                }
                             </div>
                             <div class="content">
                                 <p class="b1 description">
-                                    Living life by the motto, "You didn't get this far by giving up." It hasn't failed me yet.
+                                    @Model?.Byline
                                 </p>
                                 <ul class="social-share-transparent size-md">
-                                    <li>
-                                        <a href="https://www.linkedin.com/in/cadence-eva-custin/" alt="linkedin">
-                                            <i class="fab fa-linkedin-in"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="https://github.com/eva-grimm" alt="github">
-                                            <i class="bi bi-github"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="mailto:eva.custin@gmail.com" alt="email">
-                                            <i class="bi bi-envelope-at"></i>
-                                        </a>
-                                    </li>
+                                    @if (Model?.LinkedIn != null)
+                                    {
+                                        <li>
+                                            <a href="@Model.LinkedIn" alt="LinkedIn">
+                                                <i class="fab fa-linkedin-in"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (Model?.GitHub != null)
+                                    {
+                                        <li>
+                                            <a href="@Model.GitHub" alt="GitHub">
+                                                <i class="bi bi-github"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (Model?.Twitter != null)
+                                    {
+                                        <li>
+                                            <a href="@Model?.Twitter" alt="Twitter">
+                                                <i class="bi bi-twitter"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (Model?.Facebook != null)
+                                    {
+                                        <li>
+                                            <a href="@Model?.Facebook" alt="Facebook">
+                                                <i class="bi bi-facebook"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (Model?.Instagram != null)
+                                    {
+                                        <li>
+                                            <a href="@Model?.Instagram" alt="Instagram">
+                                                <i class="bi bi-instagram"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (Model?.Website != null)
+                                    {
+                                        <li>
+                                            <a href="@Model.Website" alt="Website">
+                                                <i class="bi bi-link-45deg"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (Model?.Email != null)
+                                    {
+                                        <li>
+                                            <a href="mailto:@Model.Email" alt="Email">
+                                                <i class="bi bi-envelope-at"></i>
+                                            </a>
+                                        </li>
+                                    }
                                 </ul>
                             </div>
                         </div>

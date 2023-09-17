@@ -6864,7 +6864,7 @@ input[type=radio] ~ label::after {
   border-color: var(--color-primary);
 }
 
-input[type=submit] {
+/*input[type=submit] {
   width: auto;
   padding: 0 30px;
   border-radius: 500px;
@@ -6888,7 +6888,7 @@ input[type=submit]:hover {
   -webkit-transform: translateY(-5px);
       -ms-transform: translateY(-5px);
           transform: translateY(-5px);
-}
+}*/
 
 /**************************************
 	Elements Styles

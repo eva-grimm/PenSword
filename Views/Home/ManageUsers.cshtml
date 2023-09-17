@@ -1,0 +1,64 @@
+﻿@model IEnumerable<BlogUser>
+@inject IRoleService _RoleService
+
+@{
+    ViewBag.Title = "Manage Users";
+}
+<div class="axil-post-list-area axil-section-gap bg-color-white">
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th># of Posts</th>
+                    <th># of Comments</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (BlogUser user in Model)
+                {
+                    <tr>
+                        <td>@user.FullName</td>
+                        <td>
+                            @foreach (string? role in await _RoleService.GetUserRolesAsync(user.Id))
+                            {
+                                <span>@role</span>
+                            }
+                        </td>
+                        <td>@user.Authored.Count()</td>
+                        <td>@user.Comments.Count()</td>
+                        <td>
+                            <a asp-action="ManageUserRoles" asp-route-userId="@user.Id" class="btn btn-primary">Manage Roles</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <!--Sweet Alerts-->
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        let message = '@(ViewBag.SwalMessage)';
+        if (!message.includes("Error") && message != '') {
+            Swal.fire({
+                backdrop: false,
+                icon: 'success',
+                title: message,
+                showConfirmButton: true
+            });
+        } else if (message.includes("Error")) {
+            Swal.fire({
+                backdrop: false,
+                icon: 'error',
+                title: 'Oops...',
+                text: message
+            });
+        }
+    </script>
+    <!--End Sweet Alerts-->
+}

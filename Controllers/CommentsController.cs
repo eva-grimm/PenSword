@@ -1,35 +1,30 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using PenSword.Data;
 using PenSword.Models;
+using PenSword.Enums;
+using PenSword.Services.Interfaces;
 using System.Text.RegularExpressions;
 
 namespace PenSword.Controllers
 {
     public class CommentsController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly UserManager<BlogUser> _userManager;
+        private readonly ICommentService _commentService;
+        private readonly IRoleService _roleService;
 
-        public CommentsController(ApplicationDbContext context,
-            UserManager<BlogUser> userManager)
+        public CommentsController(UserManager<BlogUser> userManager,
+            ICommentService commentService,
+            IRoleService roleService)
         {
-            _context = context;
             _userManager = userManager;
-        }
-
-        // GET: Comments
-        public async Task<IActionResult> Index()
-        {
-            var applicationDbContext = _context.Comments.Include(c => c.Author).Include(c => c.BlogPost);
-            return View(await applicationDbContext.ToListAsync());
+            _commentService = commentService;
+            _roleService = roleService;
         }
 
         // POST: Comments/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost,ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Body,BlogPostId")] Comment comment, string? slug)
         {
             ModelState.Remove("AuthorId");
@@ -42,9 +37,10 @@ namespace PenSword.Controllers
                 // remove excess space around comment due to editor
                 comment.Body = Regex.Replace(comment.Body!, @"<[^>]*>", string.Empty);
 
-                _context.Add(comment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Details", "BlogPosts", new { slug = slug });
+                bool success = await _commentService.AddCommentAsync(comment);
+                if (!success) return BadRequest();
+                if (slug != null)
+                    return RedirectToAction("Details", "BlogPosts", new { slug });
             }
             return View(comment);
         }
@@ -53,91 +49,99 @@ namespace PenSword.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
-
-            Comment? comment = await _context.Comments.FindAsync(id);
+            Comment? comment = await _commentService.GetCommentAsync(id);
             if (comment == null) return NotFound();
 
-            ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Content", comment.BlogPostId);
             return View(comment);
         }
 
         // POST: Comments/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Created,Updated,UpdateReason,Body,AuthorId,BlogPostId")] Comment comment)
+        [HttpPost, ValidateAntiForgeryToken, Authorize]
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id != comment.Id) return NotFound();
+            Comment? comment = await _commentService.GetCommentAsync(id);
+            if (comment == null) return NotFound();
+            string? currentUserId = _userManager.GetUserId(User);
 
-            ModelState.Remove("AuthorId");
+            // only allow edits if an admin, a moderator, or the comment's author
+            bool allowedToEdit = (await _roleService.IsUserInRoleAsync(currentUserId, nameof(Roles.Admin))
+                || await _roleService.IsUserInRoleAsync(currentUserId, nameof(Roles.Moderator))
+                || comment.AuthorId == currentUserId);
+            if (!allowedToEdit) return Unauthorized();
 
-            if (ModelState.IsValid)
+            bool validUpdate = await TryUpdateModelAsync(
+                comment,
+                string.Empty,
+                c => c.Body,
+                c => c.UpdateReason);
+
+            if (!validUpdate) return View(comment);
+
+            try
             {
-                try
-                {
-                    comment.Updated = DateTime.Now;
-                    _context.Update(comment);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CommentExists(comment.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                comment.Updated = DateTime.Now;
+                bool success = await _commentService.UpdateCommentAsync(comment);
+                if (!success) return BadRequest();
+
+                string? blogPostSlug = comment.BlogPost!.Slug;
+                if (blogPostSlug != null)
+                    return RedirectToAction("Details", "BlogPosts", new { slug = blogPostSlug });
+                else
+                    return RedirectToAction("Index", "BlogPosts");
             }
-            ViewData["AuthorId"] = new SelectList(_context.Users, "Id", "Id", comment.AuthorId);
-            ViewData["BlogPostId"] = new SelectList(_context.BlogPosts, "Id", "Content", comment.BlogPostId);
-            return View(comment);
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
         // GET: Comments/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Comments == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
+            Comment? comment = await _commentService.GetCommentAsync(id);
+            if (comment == null) return NotFound();
+            string? currentUserId = _userManager.GetUserId(User);
 
-            var comment = await _context.Comments
-                .Include(c => c.Author)
-                .Include(c => c.BlogPost)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
+            // only allow delete if an admin, a moderator, or the comment's author
+            bool allowedToDelete = (await _roleService.IsUserInRoleAsync(currentUserId, nameof(Roles.Admin))
+                || await _roleService.IsUserInRoleAsync(currentUserId, nameof(Roles.Moderator))
+                || comment.AuthorId == currentUserId);
+            if (!allowedToDelete) return Unauthorized();
 
             return View(comment);
         }
 
         // POST: Comments/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ActionName("Delete"),ValidateAntiForgeryToken, Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Comments == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Comments'  is null.");
-            }
-            var comment = await _context.Comments.FindAsync(id);
-            if (comment != null)
-            {
-                _context.Comments.Remove(comment);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+            Comment? comment = await _commentService.GetCommentAsync(id);
+            if (comment == null) return NotFound();
+            string? currentUserId = _userManager.GetUserId(User);
 
-        private bool CommentExists(int id)
-        {
-          return (_context.Comments?.Any(e => e.Id == id)).GetValueOrDefault();
+            // only allow delete if an admin, a moderator, or the comment's author
+            bool allowedToDelete = (await _roleService.IsUserInRoleAsync(currentUserId, nameof(Roles.Admin))
+                || await _roleService.IsUserInRoleAsync(currentUserId, nameof(Roles.Moderator))
+                || comment.AuthorId == currentUserId);
+            if (!allowedToDelete) return Unauthorized();
+
+            try
+            {
+                bool success = await _commentService.DeleteCommentAsync(comment);
+                if (!success) return BadRequest();
+
+                string? blogPostSlug = comment.BlogPost!.Slug;
+                if (blogPostSlug != null)
+                    return RedirectToAction("Details", "BlogPosts", new { slug = blogPostSlug });
+                else
+                    return RedirectToAction("Index", "BlogPosts");
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
     }
 }

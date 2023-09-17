@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PenSword.Data;
@@ -11,9 +12,11 @@ using PenSword.Data;
 namespace PenSword.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230912013328_0007_AddedAuthorToBlogPost")]
+    partial class _0007_AddedAuthorToBlogPost
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -236,15 +239,6 @@ namespace PenSword.Data.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Bio")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Byline")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Company")
-                        .HasColumnType("text");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
@@ -256,16 +250,10 @@ namespace PenSword.Data.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Facebook")
-                        .HasColumnType("text");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
-
-                    b.Property<string>("GitHub")
-                        .HasColumnType("text");
 
                     b.Property<byte[]>("ImageData")
                         .HasColumnType("bytea");
@@ -273,19 +261,10 @@ namespace PenSword.Data.Migrations
                     b.Property<string>("ImageType")
                         .HasColumnType("text");
 
-                    b.Property<string>("Instagram")
-                        .HasColumnType("text");
-
-                    b.Property<string>("JobTitle")
-                        .HasColumnType("text");
-
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
-
-                    b.Property<string>("LinkedIn")
-                        .HasColumnType("text");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -313,18 +292,12 @@ namespace PenSword.Data.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
-                    b.Property<string>("Twitter")
-                        .HasColumnType("text");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
-
-                    b.Property<string>("Website")
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -518,7 +491,7 @@ namespace PenSword.Data.Migrations
             modelBuilder.Entity("PenSword.Models.BlogPost", b =>
                 {
                     b.HasOne("PenSword.Models.BlogUser", "Author")
-                        .WithMany("Authored")
+                        .WithMany("Author")
                         .HasForeignKey("AuthorId");
 
                     b.HasOne("PenSword.Models.Category", "Category")
@@ -577,7 +550,7 @@ namespace PenSword.Data.Migrations
 
             modelBuilder.Entity("PenSword.Models.BlogUser", b =>
                 {
-                    b.Navigation("Authored");
+                    b.Navigation("Author");
 
                     b.Navigation("Comments");
 

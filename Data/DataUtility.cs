@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using PenSword.Models;
+using PenSword.Enums;
 
 namespace PenSword.Data
 {
@@ -9,6 +10,7 @@ namespace PenSword.Data
     {
         private const string? _adminRole = "Admin";
         private const string? _modRole = "Moderator";
+        private const string? _authorRole = "Author";
         public static string GetConnectionString(IConfiguration configuration)
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -55,16 +57,20 @@ namespace PenSword.Data
 
         private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManagerSvc)
         {
-            if(!await roleManagerSvc.RoleExistsAsync(_adminRole!))
+            if(!await roleManagerSvc.RoleExistsAsync(nameof(Roles.Admin)))
             {
-                await roleManagerSvc.CreateAsync(new IdentityRole(_adminRole!));
+                await roleManagerSvc.CreateAsync(new IdentityRole(nameof(Roles.Admin)));
             }
             
-            if(!await roleManagerSvc.RoleExistsAsync(_modRole!))
+            if(!await roleManagerSvc.RoleExistsAsync(nameof(Roles.Author)))
             {
-                await roleManagerSvc.CreateAsync(new IdentityRole(_modRole!));
+                await roleManagerSvc.CreateAsync(new IdentityRole(nameof(Roles.Author)));
             }
 
+            if(!await roleManagerSvc.RoleExistsAsync(nameof(Roles.Moderator)))
+            {
+                await roleManagerSvc.CreateAsync(new IdentityRole(nameof(Roles.Moderator)));
+            }
         }
         
         private static async Task SeedBlogUsersAsync(UserManager<BlogUser> userManager, IConfiguration configuration)

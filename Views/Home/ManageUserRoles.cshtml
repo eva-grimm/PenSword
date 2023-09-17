@@ -1,0 +1,46 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@model BlogUser
+@inject IRoleService _RoleService
+
+@{
+    ViewBag.Title = "Manage User Roles";
+    List<IdentityRole> roles = await _RoleService.GetRolesAsync();
+}
+
+<div class="axil-post-list-area axil-section-gap bg-color-white">
+    <div class="container">
+        <div class="row">
+            <h2 class="m-t-0 h3"><b>Manage Roles </b></h2>
+            <div class="row">
+                <div class="card col-4 m-3">
+                    <div class="card-body">
+                        <p class="text-muted font-13 m-b-30">
+                            This form displays the current role assigned to the user: <strong class="text-info">@Model.FullName</strong>.
+                            Use the dropdown to select the role this user should be assigned, then click "Assign Roles" to submit.
+                        </p>
+                        <hr />
+                        <form asp-action="ManageUserRolesConfirmed" asp-controller="Home" method=post>
+                            <input type="hidden" name="userId" value="@Model.Id" />
+                            <div class="form-group w-auto">
+                                <label for="selectedRole" class="custom-label">@Model.FullName's Roles</label>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <select name="selected" class="form-control" asp-items="@ViewBag.Roles"
+                                                size="@roles.Count()">
+                                                <option>None</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <hr />
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Assign Role" class="btn btn-info" />
+                                <a asp-action="Admin" class="btn btn-danger">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

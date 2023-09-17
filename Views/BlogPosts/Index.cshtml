@@ -1,7 +1,4 @@
-﻿@using X.PagedList
-@using X.PagedList.Mvc.Core
-@using X.PagedList.Web.Common
-@model IPagedList<BlogPost>
+﻿@model IPagedList<BlogPost>
 @inject IImageService _ImageService
 
 @{
@@ -13,26 +10,29 @@
     switch (actionName)
     {
         case "Index":
-            pageTitle = "My Blogs";
+            pageTitle = "Recent Blogs";
             break;
         case "SearchIndex":
             pageTitle = $"Search for '{searchString}'";
             break;
         case "FilterByCategory":
-            pageTitle = $"{searchString} Blogs Only";
+            pageTitle = $"Blogs in '{searchString}' Category Only";
+            break;
+        case "FilterByTag":
+            pageTitle = $"Blogs with '{searchString}' Tag Only";
             break;
         case "PopularBlogs":
             pageTitle = "Popular Posts";
             break;
-        case "FavoriteBlogs":
-            pageTitle = "Favorite Posts";
+        case "LikedBlogs":
+            pageTitle = "Liked Posts";
             break;
     }
 }
 
-<!-- Start Author Area  -->
-<partial name="_AuthorAreaPartial" />
-<!-- End Author Area  -->
+@* <!-- Start Author Area  -->
+<partial name="_AuthorAreaPartial" model=""/>
+<!-- End Author Area  --> *@
 <!-- Start Post List Wrapper  -->
 <div class="axil-post-list-area axil-section-gap bg-color-white">
     <div class="container">

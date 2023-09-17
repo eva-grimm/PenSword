@@ -1,0 +1,92 @@
+﻿@model BlogUser
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<div class="container">
+    <h1>Editing Author Profile</h1>
+    <hr />
+    <form asp-action="EditAuthorProfile">
+        <div class="row">
+            <div class="col-12 col-md-4">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="JobTitle" class="control-label"></label>
+                    <input asp-for="JobTitle" class="form-control" />
+                    <span asp-validation-for="JobTitle" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Company" class="control-label"></label>
+                    <input asp-for="Company" class="form-control" />
+                    <span asp-validation-for="Company" class="text-danger"></span>
+                </div>
+                <a class="btn btn-primary" data-bs-toggle="collapse" href="#socials" role="button"
+                   aria-expanded="false" aria-controls="collapseExample">Show Social Media Links</a>
+            </div>
+            <div class="col-12 col-md-8">
+                <div class="form-group">
+                    <label asp-for="Byline" class="control-label"></label>
+                    <input asp-for="Byline" class="form-control"
+                           placeholder="A one to two sentence statement about you." />
+                    <span asp-validation-for="Byline" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Bio" class="control-label"></label>
+                    <textarea asp-for="Bio" class="form-control"
+                        placeholder="One to two paragraphs about you."></textarea>
+                    <span asp-validation-for="Bio" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="collapse" id="socials">
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="col form-group">
+                        <label asp-for="LinkedIn" class="control-label"></label>
+                        <input asp-for="LinkedIn" class="form-control" />
+                        <span asp-validation-for="LinkedIn" class="text-danger"></span>
+                    </div>
+                    <div class="col form-group">
+                        <label asp-for="GitHub" class="control-label"></label>
+                        <input asp-for="GitHub" class="form-control" />
+                        <span asp-validation-for="GitHub" class="text-danger"></span>
+                    </div>
+                    <div class="col form-group">
+                        <label asp-for="Twitter" class="control-label"></label>
+                        <input asp-for="Twitter" class="form-control" />
+                        <span asp-validation-for="Twitter" class="text-danger"></span>
+                    </div>
+                    <div class="col form-group">
+                        <label asp-for="Facebook" class="control-label"></label>
+                        <input asp-for="Facebook" class="form-control" />
+                        <span asp-validation-for="Facebook" class="text-danger"></span>
+                    </div>
+                    <div class="col form-group">
+                        <label asp-for="Instagram" class="control-label"></label>
+                        <input asp-for="Instagram" class="form-control" />
+                        <span asp-validation-for="Instagram" class="text-danger"></span>
+                    </div>
+                    <div class="col form-group">
+                        <label asp-for="Website" class="control-label"></label>
+                        <input asp-for="Website" class="form-control" />
+                        <span asp-validation-for="Website" class="text-danger"></span>
+                    </div>
+                    <div class="col form-group">
+                        <label asp-for="Email" class="control-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Edit" class="btn btn-primary" />
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

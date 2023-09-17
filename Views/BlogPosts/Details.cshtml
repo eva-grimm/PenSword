@@ -1,14 +1,15 @@
 ﻿@model BlogPost
-@inject UserManager<BlogUser> _userManager
+@inject UserManager<BlogUser> _UserManager
 @inject IImageService _ImageService
 @inject IBlogService _BlogService
 @inject IUserService _UserService
+@inject IRoleService _RoleService
 
 @{
     ViewData["Title"] = "Details";
-    bool isLiked = await _UserService.DoesUserLikeBlogAsync(Model.Id, _userManager.GetUserId(User)!);
-
+    bool isLiked = await _UserService.DoesUserLikeBlogAsync(Model.Id, _UserManager.GetUserId(User)!);
     int count = Model.Likes.Count();
+    BlogUser? currentUser = await _UserManager.GetUserAsync(User);
 }
 
 <style>
@@ -22,73 +23,7 @@
         <div class="row">
             <div class="col-lg-8 offset-lg-2">
                 <!-- Start Banner Area -->
-                <div class="banner banner-single-post post-formate post-layout pb--40">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <!-- Start Single Slide  -->
-                                <div class="content-block">
-                                    <!-- Start Post Content  -->
-                                    <div class="post-content">
-                                        <div class="post-cat">
-                                            <div class="post-cat-list">
-                                                <a class="hover-flip-item-wrapper" href="#">
-                                                    <span class="hover-flip-item">
-                                                        <span data-text="@Model.Category?.Name">@Model.Category?.Name</span>
-                                                    </span>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <h1 class="title">
-                                            @Model.Title
-                                        </h1>
-                                        <!-- Post Meta  -->
-                                        <div class="post-meta-wrapper">
-                                            <div class="post-meta">
-                                                <div class="post-author-avatar border-rounded">
-                                                    <img src="@_ImageService.ConvertByteArrayToFile(null, null, DefaultImage.AuthorImage)"
-                                                         alt="Author Image" style="height:80px;width:80px">
-                                                </div>
-                                                <div class="content">
-                                                    <h6 class="post-author-name">
-                                                        <a class="hover-flip-item-wrapper" href="#">
-                                                            <span class="hover-flip-item">
-                                                                <span data-text="Cadence Eva Custin">Cadence Eva Custin</span>
-                                                            </span>
-                                                        </a>
-                                                    </h6>
-                                                    <ul class="post-meta-list">
-                                                        <li>@Model.Created.ToString("MMM dd, yyyy")</li>
-                                                        <li>@Model.Comments.Count</li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                            <ul class="social-share-transparent justify-content-end">
-                                                <li>
-                                                    <a href="https://www.linkedin.com/in/cadence-eva-custin/" alt="linkedin">
-                                                        <i class="fab fa-linkedin-in"></i>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="https://github.com/eva-grimm" alt="github">
-                                                        <i class="bi bi-github"></i>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="mailto:eva.custin@gmail.com" alt="email">
-                                                        <i class="bi bi-envelope-at"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <!-- End Post Content  -->
-                                </div>
-                                <!-- End Single Slide  -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <partial name="_AuthorHeaderPartial" model="@Model" />
                 <!-- End Banner Area -->
                 <!-- Start Blog Details  -->
                 <div class="axil-post-details">
@@ -97,13 +32,13 @@
                     </p>
                     <figure class="wp-block-image alignwide text-center">
                         <img src="@_ImageService.ConvertByteArrayToFile(Model.ImageData, Model.ImageType, DefaultImage.BlogPostImage)"
-                             alt="#" />
+                             alt="Blog Image" />
                     </figure>
                     @Html.Raw(Model.Content)
                     <div class="tagcloud">
                         @foreach (Tag tag in Model.Tags)
                         {
-                            <a href="#">@tag.Name</a>
+                            <a asp-action="FilterByTag" asp-route-id="@tag.Id">@tag.Name</a>
                         }
                     </div>
                     <div class="social-share-block">
@@ -123,7 +58,7 @@
                         </div>
                     </div>
                     <!-- Start Author  -->
-                    <partial name="_AuthorAreaPartial" />
+                    <partial name="_AuthorAreaPartial" model="Model.Author" />
                     <!-- End Author  -->
                     <!-- Start Comment Form Area  -->
                     <div class="axil-comment-area">
@@ -131,7 +66,6 @@
                         @if (User.Identity!.IsAuthenticated)
                         {
                             <div class="comment-respond">
-                                <h4 class="title">Post a comment</h4>
                                 <form asp-action="Create" asp-controller="Comments">
                                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                     <input type="hidden" name="BlogPostId" value="@Model.Id" class="form-control" />
@@ -139,8 +73,8 @@
                                     <div class="row row-md-10">
                                         <div class="col-12">
                                             <div class="form-group">
-                                                <label for="editor">Leave a Reply</label>
-                                                <textarea id="editor" class="form-control" name="Body"></textarea>
+                                                <h4 class="title"><label for="content">Leave a Reply</label></h4>
+                                                <textarea id="content" class="form-control" name="Body"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -168,7 +102,7 @@
                         <!-- End Comment Respond  -->
                         <!-- Start Comment Area  -->
                         <div class="axil-comment-area">
-                            <h4 class="title">0 Comments</h4>
+                            <h4 class="title">@Model.Comments.Count() Comments</h4>
                             <ul class="comment-list">
                                 @foreach (Comment comment in Model.Comments)
                                 {
@@ -198,6 +132,19 @@
                                                             @Html.Raw(comment.Body)
                                                         </p>
                                                     </div>
+                                                    @if (await _RoleService.IsUserInRoleAsync(currentUser?.Id, nameof(Roles.Admin))
+                                                   || await _RoleService.IsUserInRoleAsync(currentUser?.Id, nameof(Roles.Moderator))
+                                                   || comment.AuthorId == currentUser?.Id)
+                                                    {
+                                                        <div>
+                                                            <a asp-action="Edit" asp-controller="Comments" asp-route-id="@comment.Id">
+                                                                <i class="bi bi-pencil-fill"></i> Edit
+                                                            </a>
+                                                            <a asp-action="Delete" asp-controller="Comments" asp-route-id="@comment.Id" class="ms-3">
+                                                                <i class="bi bi-trash-fill"></i> Delete
+                                                            </a>
+                                                        </div>
+                                                    }
                                                 </div>
                                             </div>
                                         </div>
@@ -226,7 +173,7 @@
     <!--Handle Like Button Clicks-->
     <script type="text/javascript">
         @{
-            string userId = _userManager.GetUserId(User)!;
+            string userId = _UserManager.GetUserId(User)!;
         }
             let userId = '@userId';
         $('#likesButton').click(function () {
@@ -271,15 +218,25 @@
         });
     </script>
 
-    <!--CK Editor-->
-    <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
+    <!-- Tiny Docs Script -->
     <script>
-        ClassicEditor
-            .create(document.querySelector('#editor'), {
-                licenseKey: '',
-            })
-            .then(editor => {
-                window.editor = editor;
-            });;
+        tinymce.init({
+            selector: 'textarea#content',
+            plugins: 'ai tinycomments mentions anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed permanentpen footnotes advtemplate advtable advcode editimage tableofcontents mergetags powerpaste tinymcespellchecker autocorrect a11ychecker typography inlinecss',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image imageupload media table mergetags | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap codesample | removeformat |',
+            tinycomments_mode: 'embedded',
+            tinycomments_author: 'Author name',
+            mergetags_list: [
+                { value: 'First.Name', title: 'First Name' },
+                { value: 'Email', title: 'Email' },
+            ],
+            codesample_languages: [
+                { text: 'HTML/XML', value: 'markup' },
+                { text: 'JavaScript', value: 'javascript' },
+                { text: 'CSS', value: 'css' },
+                { text: 'C#', value: 'csharp' },
+            ],
+            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant")),
+        });
     </script>
 }

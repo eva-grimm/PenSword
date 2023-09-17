@@ -1,8 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@inject UserManager<BlogUser> UserManager
+@inject UserManager<BlogUser> _UserManager
 @inject IImageService _ImageService
 @{
-    BlogUser? blogUser = await UserManager.GetUserAsync(User);
+    BlogUser? blogUser = await _UserManager.GetUserAsync(User);
 }
 
 <!DOCTYPE html>
@@ -85,33 +85,51 @@
                                             @if (User.Identity!.IsAuthenticated)
                                             {
                                                 <li>
-                                                    <a class="hover-flip-item-wrapper" asp-action="FavoriteBlogs" asp-controller="BlogPosts">
+                                                    <a class="hover-flip-item-wrapper" asp-action="LikedBlogs" asp-controller="BlogPosts">
                                                         <span class="hover-flip-item">
-                                                            <span data-text="Favorite Posts"> Favorite Posts</span>
+                                                            <span data-text="Liked Posts"> Liked Posts</span>
                                                         </span>
                                                     </a>
                                                 </li>
                                             }
                                         </ul>
                                     </li>
-                                    <li><a asp-action="ContactMe" asp-controller="Home">Contact Us</a></li>
-
-                                    @if (User.IsInRole("Admin"))
+                                    <li class="menu-item-has-children">
+                                        <a>Contact</a>
+                                        <ul class="axil-submenu">
+                                            <li>
+                                                <a class="hover-flip-item-wrapper" asp-action="ContactUs" asp-controller="Home">
+                                                    <span class="hover-flip-item">
+                                                        <span data-text="Contact Us">Contact Us</span>
+                                                    </span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="hover-flip-item-wrapper" asp-action="AuthorApplication" asp-controller="Home">
+                                                    <span class="hover-flip-item">
+                                                        <span data-text="Apply to be an Author">Apply to be an Author</span>
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Author"))
                                     {
                                         <li class="menu-item-has-children">
                                             <a>Author</a>
                                             <ul class="axil-submenu">
                                                 <li>
-                                                    <a class="hover-flip-item-wrapper" asp-controller="BlogPosts" asp-action="Index">
+                                                    <a class="hover-flip-item-wrapper" href="~/swagger">
                                                         <span class="hover-flip-item">
-                                                            <span data-text="Admin">Admin</span>
+                                                            <span data-text="APIs">APIs</span>
                                                         </span>
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="hover-flip-item-wrapper" href="~/swagger">
+                                                    <a class="hover-flip-item-wrapper" asp-controller="Home"
+                                                       asp-action="EditAuthorProfile" asp-route-authorId="@_UserManager.GetUserId(User)">
                                                         <span class="hover-flip-item">
-                                                            <span data-text="APIs">APIs</span>
+                                                            <span data-text="Manage Author Profile">Manage Author Profile</span>
                                                         </span>
                                                     </a>
                                                 </li>
@@ -126,6 +144,22 @@
                                                     <a class="hover-flip-item-wrapper" asp-controller="BlogPosts" asp-action="AuthorArea">
                                                         <span class="hover-flip-item">
                                                             <span data-text="Manage Posts">Manage Posts</span>
+                                                        </span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    }
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li class="menu-item-has-children">
+                                            <a>Admin</a>
+                                            <ul class="axil-submenu">
+                                                <li>
+                                                    <a class="hover-flip-item-wrapper" asp-controller="Home"
+                                                       asp-action="Admin">
+                                                        <span class="hover-flip-item">
+                                                            <span data-text="Manage Users">Manage Users</span>
                                                         </span>
                                                     </a>
                                                 </li>
@@ -178,9 +212,9 @@
                                         </span>
                                         @if (User.Identity!.IsAuthenticated)
                                         {
-                                        <span>
-                                            <img src="@_ImageService.ConvertByteArrayToFile(blogUser!.ImageData, blogUser.ImageType, DefaultImage.BlogUserImage)" />
-                                        </span>
+                                            <span>
+                                                <img src="@_ImageService.ConvertByteArrayToFile(blogUser!.ImageData, blogUser.ImageType, DefaultImage.BlogUserImage)" />
+                                            </span>
                                         }
                                     </a>
                                     @if (User.Identity!.IsAuthenticated)
@@ -237,20 +271,37 @@
                         <ul class="axil-submenu">
                             <li><a asp-action="Index" asp-controller="BlogPosts">All Posts</a></li>
                             <li><a asp-action="PopularBlogs" asp-controller="BlogPosts">Popular Posts</a></li>
-                            <li><a asp-action="FavoriteBlogs" asp-controller="BlogPosts">Favorite Posts</a></li>
+                            <li><a asp-action="LikedBlogs" asp-controller="BlogPosts">Liked Posts</a></li>
                         </ul>
                     </li>
-                    <li><a asp-action="ContactMe" asp-controller="Home">Contact Me</a></li>
-
-                    @if (User.IsInRole("Admin"))
+                    <li class="menu-item-has-children">
+                        <a>Contact</a>
+                        <ul class="axil-submenu">
+                            <li><a asp-action="ContactUs" asp-controller="Home">Contact Us</a></li>
+                            <li><a asp-action="AuthorApplication" asp-controller="Home">Apply to be an Author</a></li>
+                        </ul>
+                    </li>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Author"))
                     {
                         <li class="menu-item-has-children">
                             <a>Author</a>
                             <ul class="axil-submenu">
-                                <li><a asp-controller="BlogPosts" asp-action="Index">Admin</a></li>
                                 <li><a href="~/swagger">APIs</a></li>
+                                <li>
+                                    <a asp-controller="Home" asp-action="EditAuthorProfile"
+                                       asp-route-authorId="@_UserManager.GetUserId(User)">Manage Author Profile</a>
+                                </li>
                                 <li><a asp-controller="BlogPosts" asp-action="Create">Add New Post</a></li>
                                 <li><a asp-controller="BlogPosts" asp-action="AuthorArea">Manage Posts</a></li>
+                            </ul>
+                        </li>
+                    }
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="menu-item-has-children">
+                            <a>Admin</a>
+                            <ul class="axil-submenu">
+                                <li><a asp-controller="Home" asp-action="ManageUsers">Manage Users</a></li>
                                 <li><a asp-controller="Categories" asp-action="Index">Manage Categories</a></li>
                                 <li><a asp-controller="Tags" asp-action="Index">Manage Tags</a></li>
                             </ul>
@@ -261,7 +312,6 @@
             </div>
         </div>
         <!-- End Mobile Menu Area  -->
-
         @RenderBody()
 
         <!-- Start Footer Area  -->
@@ -314,7 +364,7 @@
                             <div class="copyright-left">
                                 <ul class="mainmenu justify-content-start">
                                     <li>
-                                        <a class="hover-flip-item-wrapper" asp-controller="Home" asp-action="ContactMe">
+                                        <a class="hover-flip-item-wrapper" asp-controller="Home" asp-action="ContactUs">
                                             <span class="hover-flip-item">
                                                 <span data-text="Contact Us">Contact Us</span>
                                             </span>

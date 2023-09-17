@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
@@ -23,6 +22,11 @@ namespace PenSword.Models
 
         [Required]
         public string? Content { get; set; }
+
+        public string? AuthorId { get; set; }
+
+        [Display(Name = "Category")]
+        public int CategoryId { get; set; }
 
         public DateTime Created
         {
@@ -52,8 +56,8 @@ namespace PenSword.Models
         public string? ImageType { get; set; }
 
         //Navigation Properties
-        [Display(Name = "Category")]
-        public int CategoryId { get; set; }
+        [JsonIgnore]
+        public virtual BlogUser? Author { get; set; }
         [JsonIgnore]
         public virtual Category? Category { get; set; }
         [JsonIgnore]
@@ -62,7 +66,5 @@ namespace PenSword.Models
         public virtual ICollection<Tag> Tags { get; set; } = new HashSet<Tag>();
         [JsonIgnore]
         public virtual ICollection<Like> Likes { get; set; } = new HashSet<Like>();
-
-        public virtual ICollection<BlogUser> UsersWhoLikeThis { get; set; } = new HashSet<BlogUser>();
     }
 }

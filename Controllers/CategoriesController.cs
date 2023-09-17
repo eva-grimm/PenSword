@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using PenSword.Data;
 using PenSword.Models;
 using PenSword.Services.Interfaces;
 
@@ -15,23 +8,23 @@ namespace PenSword.Controllers
     [Authorize(Roles = "Admin")]
     public class CategoriesController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly IBlogService _blogService;
         private readonly IImageService _imageService;
+        private readonly ICategoryService _categoryService;
 
-        public CategoriesController(ApplicationDbContext context,
-            IBlogService blogService,
-            IImageService imageService)
+        public CategoriesController(IBlogService blogService,
+            IImageService imageService,
+            ICategoryService categoryService)
         {
-            _context = context;
             _blogService = blogService;
             _imageService = imageService;
+            _categoryService = categoryService;
         }
 
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-            return View(await _blogService.GetCategoriesAsync());
+            return View(await _categoryService.GetCategoriesAsync());
         }
 
         // GET: Categories/Create
@@ -41,8 +34,7 @@ namespace PenSword.Controllers
         }
 
         // POST: Categories/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost,ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name,Description,ImageFile")] Category category)
         {
             if (ModelState.IsValid)
@@ -55,7 +47,7 @@ namespace PenSword.Controllers
                     category.ImageType = category.ImageFile.ContentType;
                 }
 
-                await _blogService.AddCategoryAsync(category);
+                await _categoryService.AddCategoryAsync(category);
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
@@ -66,15 +58,14 @@ namespace PenSword.Controllers
         {
             if (id == null) return NotFound();
 
-            Category? category = await _blogService.GetSingleCategoryAsync(id);
+            Category? category = await _categoryService.GetSingleCategoryAsync(id);
             if (category == null) return NotFound();
 
             return View(category);
         }
 
         // POST: Categories/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost,ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,ImageFile,ImageData,ImageType")] Category category)
         {
             if (id != category.Id) return NotFound();
@@ -89,7 +80,7 @@ namespace PenSword.Controllers
                     category.ImageType = category.ImageFile.ContentType;
                 }
 
-                await _blogService.UpdateCategoryAsync(category);
+                await _categoryService.UpdateCategoryAsync(category);
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
@@ -100,28 +91,20 @@ namespace PenSword.Controllers
         {
             if (id == null) return NotFound();
 
-            Category? category = await _blogService.GetSingleCategoryAsync(id);
+            Category? category = await _categoryService.GetSingleCategoryAsync(id);
             if (category == null) return NotFound();
 
             return View(category);
         }
 
         // Categories/DeleteConfirmed/5
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Categories == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Categories'  is null.");
-            }
-            Category? category = await _blogService.GetSingleCategoryAsync(id);
-            if (category != null)  await _blogService.DeleteCategoryAsync(id);
+            Category? category = await _categoryService.GetSingleCategoryAsync(id);
+            if (category != null)  await _categoryService.DeleteCategoryAsync(category);
             
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool CategoryExists(int id)
-        {
-          return (_context.Categories?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

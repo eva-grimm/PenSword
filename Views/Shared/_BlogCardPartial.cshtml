@@ -1,11 +1,15 @@
 ﻿@model BlogPost;
 @inject IImageService _ImageService;
 
+@{
+    IEnumerable<Tag> postTags = Model.Tags;
+}
+
 <div class="content-block post-list-view mt--30">
     <div class="post-thumbnail">
         <a href="/Content/@Model?.Slug">
-            <img src="@_ImageService.ConvertByteArrayToFile(Model?.ImageData, Model?.ImageType, DefaultImage.BlogPostImage)" 
-                alt="Post Images">
+            <img src="@_ImageService.ConvertByteArrayToFile(Model?.ImageData, Model?.ImageType, DefaultImage.BlogPostImage)"
+                 alt="Post Images">
         </a>
     </div>
     <div class="post-content">
@@ -27,9 +31,9 @@
             <div class="post-meta">
                 <div class="content">
                     <h6 class="post-author-name">
-                        <a class="hover-flip-item-wrapper" href="author.html">
+                        <a class="hover-flip-item-wrapper" asp-action="ShowAuthorProfile" asp-route-authorId="Model.Author.Id">
                             <span class="hover-flip-item">
-                                <span data-text="Cadence Eva Custin">Cadence Eva Custin</span>
+                                <span data-text="@Model?.Author?.FullName">@Model?.Author?.FullName</span>
                             </span>
                         </a>
                     </h6>
@@ -38,14 +42,18 @@
                         <li><span><i class="bi bi-card-text"></i> </span>@Model?.Comments.Count()</li>
                         <li><span><i class="bi bi-hand-thumbs-up"></i> </span>@Model?.Likes.Count()</li>
                     </ul>
+                    <div class="tagcloud">
+                        @for (int i = 0; i < 5; i++)
+                        {
+                            if (i < postTags.Count())
+                            {
+                                Tag tag = postTags.ElementAt(i);
+                                <a asp-action="FilterByTag" asp-route-id="@tag.Id">@tag.Name</a>
+                            }
+                        }
+                    </div>
                 </div>
             </div>
-            @* <ul class="social-share-transparent justify-content-end">
-            <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-            <li><a href="#"><i class="fab fa-instagram"></i></a></li>
-            <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-            <li><a href="#"><i class="fas fa-link"></i></a></li>
-            </ul> *@
         </div>
     </div>
 </div>

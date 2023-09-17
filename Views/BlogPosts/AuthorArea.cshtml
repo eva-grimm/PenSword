@@ -1,11 +1,8 @@
-﻿@using X.PagedList
-@using X.PagedList.Mvc.Core
-@using X.PagedList.Web.Common
-@model IPagedList<BlogPost>
+﻿@model IPagedList<BlogPost>
 @inject IImageService _ImageService
 
 @{
-    ViewData["Title"] = "Categories";
+    ViewData["Title"] = "Author Area";
 }
 
 <!-- Start Post List Wrapper  -->
@@ -13,7 +10,6 @@
     <div class="container">
         <a asp-action="Create" asp-controller="BlogPosts" class="axil-button button-rounded btn-primary mb-5">New Blog Post</a>
         <!-- Start Author Area Filters -->
-        @* <div class="axil-single-widget widget widget_categories mb--30"> *@
         <div class="mainmenu-wrapper">
             <nav class="mainmenu-nav">
                 <ul class="mainmenu">
@@ -48,7 +44,6 @@
                 </ul>
             </nav>
         </div>
-        @* </div> *@
         <!-- End Author Area Filters -->
         <!-- Start Post List  -->
         @foreach (BlogPost blogPost in Model)
@@ -108,31 +103,38 @@
                         <div class="post-content d-flex flex-column gap-3 align-items-center">
                             @if (!blogPost.IsDeleted)
                             {
-                                <a asp-action="TogglePublish" asp-controller="BlogPosts" asp-route-id="@blogPost.Id"
-                                   class="w-75 btn btn-outline-success">
+                                <form method="post" asp-action="TogglePublish" asp-controller="BlogPosts">
+                                    <input type="hidden" name="id" value="@blogPost.Id" />
                                     @if (!blogPost.IsPublished)
                                     {
-                                        <span>Publish</span>
+                                        <input type="submit" value="Publish"
+                                               class="btn btn-outline-success">
                                     }
                                     else if (blogPost.IsPublished)
                                     {
-                                        <span>Unpublish</span>
+                                        <input type="submit" value="Unpublish"
+                                               class="btn btn-outline-success">
                                     }
-                                </a>
+                                </form>
                             }
-                            <a asp-action="Edit" asp-controller="BlogPosts" asp-route-id="@blogPost.Id"
-                               class="w-75 btn btn-outline-warning">Edit</a>
-                            <a asp-action="ToggleDelete" asp-controller="BlogPosts" asp-route-id="@blogPost.Id"
-                               class="w-75 btn btn-outline-danger">
+                            <form method="post" asp-action="Edit" asp-controller="BlogPosts">
+                                <input type="hidden" name="id" value="@blogPost.Id" />
+                                <input type="submit" value="Edit"
+                                       class="btn btn-outline-warning" />
+                            </form>
+                            <form method="post" asp-action="ToggleDelete" asp-controller="BlogPosts">
+                                <input type="hidden" name="id" value="@blogPost.Id" />
                                 @if (blogPost.IsDeleted)
                                 {
-                                    <span>Undelete</span>
+                                    <input type="submit" value="Undelete"
+                                           class="btn btn-outline-danger" />
                                 }
                                 else
                                 {
-                                    <span>Delete</span>
+                                    <input type="submit" value="Delete"
+                                           class="btn btn-outline-danger" />
                                 }
-                            </a>
+                            </form>
                         </div>
                     </div>
                 </div>

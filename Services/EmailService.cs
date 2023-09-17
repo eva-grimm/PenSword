@@ -10,10 +10,12 @@ namespace PenSword.Services
     public class EmailService : IEmailSender
     {
         private readonly EmailSettings _emailSettings;
+
         public EmailService(IOptions<EmailSettings> emailSettings)
         {
             _emailSettings = emailSettings.Value;
         }
+
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
             try
@@ -29,32 +31,28 @@ namespace PenSword.Services
                     ? _emailSettings.EmailPort
                     : int.Parse(Environment.GetEnvironmentVariable("EmailPort")!);
 
-                // instantiate email we're building
-                MimeMessage newEmail = new();
+                // set email body
+                BodyBuilder emailBody = new()
+                {
+                    HtmlBody = htmlMessage
+                };
 
-                // set sender email
-                newEmail.Sender = MailboxAddress.Parse(emailAddress);
+                MimeMessage newEmail = new()
+                {
+                    Sender = MailboxAddress.Parse(emailAddress),
+                    Subject = subject,
+                    Body = emailBody.ToMessageBody(),
+                };
 
-                // set email recipient(s)
                 foreach (string address in email.Split(";"))
                 {
                     //newEmail.To.Add(MailboxAddress.Parse(address));
                     newEmail.Bcc.Add(MailboxAddress.Parse(address));
                 }
 
-                // set email subject
-                newEmail.Subject = subject;
-
-                // set email body
-                BodyBuilder emailBody = new();
-                emailBody.HtmlBody = htmlMessage;
-                newEmail.Body = emailBody.ToMessageBody();
-
-                // prep service and send
-                using SmtpClient smtpClient = new();
-
                 try
                 {
+                    using SmtpClient smtpClient = new();
                     await smtpClient.ConnectAsync(emailHost, emailPort, SecureSocketOptions.StartTls);
                     await smtpClient.AuthenticateAsync(emailAddress, emailPassword);
                     await smtpClient.SendAsync(newEmail);
