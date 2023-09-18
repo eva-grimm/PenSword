@@ -29,7 +29,12 @@ namespace PenSword.Controllers
         {
             ModelState.Remove("AuthorId");
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+            {
+                if (slug != null) return RedirectToAction("Details", "BlogPosts", new { slug, swalMessage = "Error: Cannot make a blank comment." });
+                else return RedirectToAction("Index", "BlogPosts", new { swalMessage = "Error: Cannot make a blank comment." });
+            }
+            else
             {
                 comment.AuthorId = _userManager.GetUserId(User);
                 comment.Created = DateTime.Now;
@@ -39,10 +44,9 @@ namespace PenSword.Controllers
 
                 bool success = await _commentService.AddCommentAsync(comment);
                 if (!success) return BadRequest();
-                if (slug != null)
-                    return RedirectToAction("Details", "BlogPosts", new { slug });
+                if (slug != null) return RedirectToAction("Details", "BlogPosts", new { slug, swalMessage = "Error: Cannot make a blank comment." });
+                else return RedirectToAction("Index", "BlogPosts", new { swalMessage = "Error: Cannot make a blank comment." });
             }
-            return View(comment);
         }
 
         // GET: Comments/Edit/5

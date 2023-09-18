@@ -121,9 +121,10 @@ namespace PenSword.Controllers
 
         // GET: BlogPosts/Details/[slug]
         [AllowAnonymous]
-        public async Task<IActionResult> Details(string? slug)
+        public async Task<IActionResult> Details(string? slug, string? swalMessage = null)
         {
             if (string.IsNullOrEmpty(slug)) return NotFound();
+            ViewBag.SwalMessage = swalMessage;
 
             BlogPost? blogPost = await _blogService.GetSingleBlogPostAsync(slug);
 
