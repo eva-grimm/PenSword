@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PenSword.Enums;
 using PenSword.Models;
 using PenSword.Services.Interfaces;
 
 namespace PenSword.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = nameof(Roles.Admin))]
     public class CategoriesController : Controller
     {
         private readonly IBlogService _blogService;

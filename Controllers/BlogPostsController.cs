@@ -12,6 +12,7 @@ using System.Text;
 
 namespace PenSword.Controllers
 {
+    [Authorize]
     public class BlogPostsController : Controller
     {
         private readonly UserManager<BlogUser> _userManager;
@@ -78,6 +79,7 @@ namespace PenSword.Controllers
         }
 
         // GET: Filter BlogPosts by Category
+        [AllowAnonymous]
         public async Task<IActionResult> FilterByCategory(int? id, int? pageNum = null)
         {
             int pageSize = 3;
@@ -88,8 +90,9 @@ namespace PenSword.Controllers
             ViewData["SearchString"] = (await _categoryService.GetSingleCategoryAsync(id))?.Name;
             return View(nameof(Index), blogPosts);
         }
-        
-        // GET: Filter BlogPosts by Category
+
+        // GET: Filter BlogPosts by Tag
+        [AllowAnonymous]
         public async Task<IActionResult> FilterByTag(int? id, int? pageNum = null)
         {
             int pageSize = 3;
@@ -102,6 +105,7 @@ namespace PenSword.Controllers
         }
 
         // GET: Search BlogPosts
+        [AllowAnonymous]
         public async Task<IActionResult> SearchIndex(string? searchString, int? pageNum)
         {
             int pageSize = 3;
