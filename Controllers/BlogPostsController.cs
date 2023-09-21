@@ -307,7 +307,7 @@ namespace PenSword.Controllers
 
             await _blogService.UpdateBlogPostAsync(blogPost);
 
-            return RedirectToAction(nameof(Details), new { slug = blogPost.Slug });
+            return RedirectToAction(nameof(AuthorArea));
         }
 
         // POST: Handle user clicking like button
@@ -334,7 +334,7 @@ namespace PenSword.Controllers
             int page = pageNum ?? 1;
             BlogUser? author = await _userManager.GetUserAsync(User);
             if (author == null) return Unauthorized();
-            IPagedList<BlogPost> blogPosts = await (await _blogService.GetPublishedBlogPostsAsync(author.Id))
+            IPagedList<BlogPost> blogPosts = await (await _blogService.GetAllBlogPostsAsync(author.Id))
                 .ToPagedListAsync(page, pageSize);
             return View(blogPosts);
         }

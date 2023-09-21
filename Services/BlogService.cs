@@ -1,12 +1,7 @@
 ﻿using Humanizer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using PenSword.Data;
 using PenSword.Models;
-using X.PagedList;
 
 namespace PenSword.Services.Interfaces
 {
