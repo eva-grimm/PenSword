@@ -92,7 +92,7 @@ namespace PenSword.Controllers
                     if (!_userService.UserExists(author.Id)) return NotFound();
                     else throw;
                 }
-                return RedirectToAction(nameof(EditAuthorProfile), new { authorId });
+                return RedirectToAction("Index", "BlogPosts", new { authorId });
             }
             return View(nameof(EditAuthorProfile), new { authorId });
         }
