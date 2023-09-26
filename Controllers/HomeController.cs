@@ -36,7 +36,7 @@ namespace PenSword.Controllers
         }
 
         // GET: ShowAuthorDetails
-        [Authorize(Policy = nameof(Policies.AdAuth))]
+        [AllowAnonymous]
         public async Task<IActionResult> ShowAuthorProfile(string? authorId)
         {
             if (string.IsNullOrEmpty(authorId)) return NotFound();
