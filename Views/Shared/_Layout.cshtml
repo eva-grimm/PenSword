@@ -205,15 +205,18 @@
                             </div>
                             <ul class="metabar-block">
                                 <li class="nav-item dropdown has-arrow main-drop">
-                                    <a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <span class="user-img">
-                                            <img src="" alt="">
-                                            <span class="status online"></span>
-                                        </span>
+                                    <a href="#" class="dropdown-toggle nav-link ms-3" data-bs-toggle="dropdown" aria-expanded="false">
                                         @if (User.Identity!.IsAuthenticated)
                                         {
                                             <span>
-                                                <img src="@_ImageService.ConvertByteArrayToFile(blogUser!.ImageData, blogUser.ImageType, DefaultImage.BlogUserImage)" />
+                                                <img src="@_ImageService.ConvertByteArrayToFile(blogUser!.ImageData, blogUser.ImageType, DefaultImage.BlogUserImage)" 
+                                                    class="user-img" alt="user avatar"/>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>
+                                                Sign In
                                             </span>
                                         }
                                     </a>
@@ -312,7 +315,6 @@
             </div>
         </div>
         <!-- End Mobile Menu Area  -->
-
         @RenderBody()
 
         <!-- Start Footer Area  -->
